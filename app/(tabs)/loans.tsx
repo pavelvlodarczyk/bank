@@ -35,9 +35,6 @@ export default function TabTwoScreen() {
         <ThemedText>
           This app has two screens:{' '}
           <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/products.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/loans.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/investments.tsx</ThemedText> and{' '}
           <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
         </ThemedText>
         <ThemedText>

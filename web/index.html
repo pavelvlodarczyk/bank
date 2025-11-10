@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!-- Crucial meta tag for PWA safe area support -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  
+  <!-- PWA meta tags -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#7B61FF" />
+  
+  <!-- Prevent zoom on inputs -->
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  
+  <!-- PWA display mode -->
+  <meta name="display" content="standalone" />
+  
+  <title>Banking Dashboard</title>
+  
+  <!-- CSS for safe area support -->
+  <style>
+    /* Ensure HTML and body support safe areas */
+    html {
+      height: 100vh;
+      height: 100dvh; /* Dynamic viewport height */
+      /* Support for safe area insets */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      /* Override any default body margins/padding */
+      height: 100%;
+      overflow: hidden;
+      /* Support for safe area insets */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    
+    #root, #expo-root {
+      height: 100%;
+      display: flex;
+      /* Support for safe area insets */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    
+    /* Fallback for browsers that don't support env() */
+    @supports not (padding: env(safe-area-inset-top)) {
+      html, body, #root, #expo-root {
+        padding: 0;
+      }
+    }
+    
+    /* Ensure safe area support works in all PWA modes */
+    @media (display-mode: standalone) {
+      html, body, #root, #expo-root {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
+    }
+    
+    @media (display-mode: fullscreen) {
+      html, body, #root, #expo-root {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
+    }
+    
+    /* For devices with notch/Dynamic Island */
+    @supports (padding: max(0px)) {
+      html, body, #root, #expo-root {
+        padding-top: max(env(safe-area-inset-top), 0px);
+        padding-left: max(env(safe-area-inset-left), 0px);
+        padding-right: max(env(safe-area-inset-right), 0px);
+        padding-bottom: max(env(safe-area-inset-bottom), 0px);
+      }
+    }
+    
+
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
