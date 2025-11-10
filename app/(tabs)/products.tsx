@@ -1,114 +1,268 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Collapsible } from '@/components/ui/collapsible';
 import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
 
-export default function TabTwoScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+interface MyProduct {
+  id: string;
+  name: string;
+  type: 'account' | 'card' | 'deposit';
+  accountNumber?: string;
+  balance?: string;
+  status: 'active' | 'blocked' | 'pending';
+  lastActivity: string;
+  icon: string;
+  color: string;
+  details: string;
+}
+
+const myProducts: MyProduct[] = [
+  {
+    id: '1',
+    name: 'Konto Osobiste Premium',
+    type: 'account',
+    accountNumber: '12 3456 7890 1234 5678 9012',
+    balance: '45 230,50 zł',
+    status: 'active',
+    lastActivity: 'Dzisiaj, 14:23',
+    icon: 'wallet-outline',
+    color: '#007AFF',
+    details: 'Główne konto osobiste z kartą debetową'
+  },
+  {
+    id: '2',
+    name: 'Karta Kredytowa Gold',
+    type: 'card',
+    accountNumber: '**** **** **** 4592',
+    balance: 'Limit: 15 000 zł | Dostępne: 12 340 zł',
+    status: 'active',
+    lastActivity: 'Wczoraj, 19:45',
+    icon: 'card-outline',
+    color: '#FF9500',
+    details: 'Złota karta kredytowa z cashback'
+  },
+  {
+    id: '3',
+    name: 'Lokata Terminowa 12M',
+    type: 'deposit',
+    balance: '25 000,00 zł',
+    status: 'active',
+    lastActivity: '2 dni temu',
+    icon: 'trending-up',
+    color: '#AF52DE',
+    details: 'Oprocentowanie: 5.5% | Do 15.03.2026'
+  },
+  {
+    id: '4',
+    name: 'Karta Debetowa Contactless',
+    type: 'card',
+    accountNumber: '**** **** **** 1247',
+    balance: 'Połączona z kontem głównym',
+    status: 'active',
+    lastActivity: 'Dzisiaj, 12:15',
+    icon: 'card',
+    color: '#5856D6',
+    details: 'Płatności bezstykowe, Apple Pay'
+  },
+  {
+    id: '5',
+    name: 'Konto Oszczędnościowe',
+    type: 'account',
+    accountNumber: '12 3456 7890 1234 5678 9087',
+    balance: '8 750,25 zł',
+    status: 'active',
+    lastActivity: '5 dni temu',
+    icon: 'wallet',
+    color: '#34C759',
+    details: 'Oprocentowanie: 3.2% w skali roku'
+  }
+];
+
+export default function ProductsScreen() {
+  const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'account': return 'KONTO';
+      case 'card': return 'KARTA';
+      case 'deposit': return 'LOKATA';
+      default: return 'PRODUKT';
+    }
+  };
+
+  const renderProduct = (product: MyProduct) => (
+    <TouchableOpacity
+      key={product.id}
+      style={[
+        styles.productContainer,
+        { 
+          backgroundColor: colorScheme === 'dark' ? '#1C1C1E' : '#FFFFFF',
+          borderColor: colorScheme === 'dark' ? '#3C3C43' : '#E5E5EA'
+        }
+      ]}
+    >
+      <View style={[styles.productIconContainer, { backgroundColor: product.color + '15' }]}>
+        <Ionicons 
+          name={product.icon as any} 
+          size={20} 
+          color={product.color}
         />
-      }>
+      </View>
+      <View style={styles.contentContainer}>
+        <View style={styles.headerRow}>
+          <ThemedText style={styles.productName}>{product.name}</ThemedText>
+          <View style={[styles.statusDot, { backgroundColor: product.status === 'active' ? '#34C759' : '#FF3B30' }]} />
+        </View>
+        <ThemedText style={styles.productSubtitle}>
+          {product.balance}
+        </ThemedText>
+        {product.accountNumber && (
+          <ThemedText style={styles.productDetail}>
+            {product.accountNumber}
+          </ThemedText>
+        )}
+      </View>
+      <Ionicons 
+        name="chevron-forward" 
+        size={16} 
+        color={colorScheme === 'dark' ? '#8E8E93' : '#C7C7CC'}
+      />
+    </TouchableOpacity>
+  );  return (
+    <ScrollView 
+      style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#151718' : '#FFFFFF' }]}
+      contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
+    >
       <ThemedView style={styles.titleContainer}>
         <ThemedText
           type="title"
           style={{
             fontFamily: Fonts.rounded,
           }}>
-          Explore
+          Produkty
         </ThemedText>
       </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/products.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/loans.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+      <View style={styles.spacer} />
+      <ThemedView style={styles.productsContainer}>
+        {myProducts.map(renderProduct)}
+      </ThemedView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
   titleContainer: {
     flexDirection: 'row',
     gap: 8,
   },
+  headerImageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+  },
+  headerEmoji: {
+    fontSize: Platform.OS === 'ios' ? 100 : 120,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    lineHeight: 22,
+    marginBottom: 24,
+    opacity: 0.8,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 32,
+    paddingVertical: 16,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    opacity: 0.7,
+    textAlign: 'center',
+  },
+  productsContainer: {
+    gap: 16,
+  },
+  productContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  productIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contentContainer: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  productName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  productSubtitle: {
+    fontSize: 13,
+    opacity: 0.7,
+    marginBottom: 2,
+  },
+  productDetail: {
+    fontSize: 12,
+    opacity: 0.5,
+    fontFamily: 'monospace',
+  },
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+  },
+  spacer: {
+    height: 24,
+  },
 });
+
+
