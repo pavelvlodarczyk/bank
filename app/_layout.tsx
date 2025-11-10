@@ -41,6 +41,15 @@ export default function RootLayout() {
               animation: 'slide_from_right',
             }} 
           />
+          <Stack.Screen 
+            name="card-details" 
+            options={{ 
+              presentation: 'modal',
+              title: 'Detail Card',
+              headerShown: false,
+              animation: 'slide_from_right',
+            }} 
+          />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>

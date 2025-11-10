@@ -221,11 +221,7 @@ export default function TransactionDetailsScreen() {
     ]}>
       <ContainerComponent style={containerStyle}>
         <View style={[
-          styles.header,
-          { 
-            backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
-            borderBottomColor: isDark ? '#2C2C2E' : '#E5E5E7'
-          }
+          styles.header
         ]}>
           <TouchableOpacity onPress={handleClose} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />

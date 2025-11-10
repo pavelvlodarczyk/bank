@@ -452,13 +452,15 @@ export default function HomeScreen() {
             <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
           </View>
           <View style={[styles.serviceSeparator, { backgroundColor: colors.border }]} />
-          <View style={styles.serviceItem}>
-            <View style={[styles.serviceIcon, { backgroundColor: colorScheme === 'dark' ? '#4A3A7A' : '#EDE7FE' }]}><Ionicons name="card-outline" size={20} color={colors.accent} /></View>
-            <View style={styles.serviceNameWrapper}>
-              <Text style={[styles.serviceName, { color: colors.text }]}>Karta kredytowa</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-          </View>
+          <Link href="/card-details" asChild>
+            <TouchableOpacity style={styles.serviceItem}>
+              <View style={[styles.serviceIcon, { backgroundColor: colorScheme === 'dark' ? '#4A3A7A' : '#EDE7FE' }]}><Ionicons name="card-outline" size={20} color={colors.accent} /></View>
+              <View style={styles.serviceNameWrapper}>
+                <Text style={[styles.serviceName, { color: colors.text }]}>Karta kredytowa</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </Link>
           <View style={[styles.serviceSeparator, { backgroundColor: colors.border }]} />
           <View style={styles.serviceItem}>
             <View style={[styles.serviceIcon, { backgroundColor: colorScheme === 'dark' ? '#4A3A7A' : '#EDE7FE' }]}><Ionicons name="cash-outline" size={20} color={colors.accent} /></View>
