@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemedText } from '@/components/themed-text';
 import { BlikLogo } from '@/components/ui/blik-logo';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 type Card = { id: string; brand: string; number: string; balance: number; type: string; gradient: readonly [string, string, ...string[]]; cvv: string; expiration: string; fullNumber: string };
 
@@ -61,6 +61,23 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const colors = getColors(colorScheme);
+  const router = useRouter();
+
+  // Handle transaction press
+  const handleTransactionPress = (transaction: any) => {
+    // Map transaction IDs from home screen to transaction detail IDs
+    let transactionDetailId = '1'; // Default to transfer
+    
+    if (transaction.id === '1') {
+      transactionDetailId = '3'; // Card transaction (Allegro)
+    } else if (transaction.id === '2') {
+      transactionDetailId = '2'; // ATM transaction
+    } else if (transaction.id === '3') {
+      transactionDetailId = '1'; // Transfer transaction
+    }
+    
+    router.push(`/transaction-details?id=${transactionDetailId}`);
+  };
 
   // Handle search button animation
   useEffect(() => {
@@ -399,7 +416,10 @@ export default function HomeScreen() {
         <View style={[styles.transactionsCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
           {transactions.map((transaction, index) => (
             <View key={transaction.id}>
-              <View style={styles.transactionItem}>
+              <TouchableOpacity 
+                style={styles.transactionItem}
+                onPress={() => handleTransactionPress(transaction)}
+              >
                 <View style={[styles.transactionIcon, { backgroundColor: colorScheme === 'dark' ? '#4A3A7A' : '#EDE7FE' }]}>
                   <Ionicons name={transaction.icon as any} size={20} color={colors.accent} />
                 </View>
@@ -413,7 +433,7 @@ export default function HomeScreen() {
                   </Text>
                   <Text style={[styles.transactionDate, { color: colors.textSecondary }]}>{transaction.date}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
               {index < transactions.length - 1 && <View style={[styles.transactionSeparator, { backgroundColor: colors.border }]} />}
             </View>
           ))}

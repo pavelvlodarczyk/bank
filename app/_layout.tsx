@@ -32,6 +32,15 @@ export default function RootLayout() {
               animation: 'slide_from_bottom',
             }} 
           />
+          <Stack.Screen 
+            name="transaction-details" 
+            options={{ 
+              presentation: 'modal',
+              title: 'Szczegóły transakcji',
+              headerShown: false,
+              animation: 'slide_from_right',
+            }} 
+          />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
