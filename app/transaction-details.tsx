@@ -1,6 +1,7 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { StyleSheet, TouchableOpacity, View, SafeAreaView, Platform, ScrollView } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, SafeAreaView, Platform, ScrollView, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRef, useEffect } from 'react';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -105,6 +106,28 @@ export default function TransactionDetailsScreen() {
   const colorScheme = useColorScheme();
   const { id } = useLocalSearchParams();
   
+  // Animation setup for web
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+  
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      // Animate modal entrance on web
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, []);
+  
   const transaction = mockTransactions[id as keyof typeof mockTransactions];
   
   if (!transaction) {
@@ -120,7 +143,25 @@ export default function TransactionDetailsScreen() {
   const isDark = colorScheme === 'dark';
 
   const handleClose = () => {
-    router.back();
+    if (Platform.OS === 'web') {
+      // Animate modal exit on web
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 15,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        router.back();
+      });
+    } else {
+      router.back();
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -162,12 +203,23 @@ export default function TransactionDetailsScreen() {
     }
   };
 
+  const ContainerComponent = Platform.OS === 'web' ? Animated.View : ThemedView;
+  const containerStyle = Platform.OS === 'web' 
+    ? [
+        styles.container,
+        {
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }]
+        }
+      ]
+    : styles.container;
+
   return (
     <SafeAreaView style={[
       styles.safeArea,
       { backgroundColor: isDark ? '#000000' : '#fff' }
     ]}>
-      <ThemedView style={styles.container}>
+      <ContainerComponent style={containerStyle}>
         <View style={[
           styles.header,
           { 
@@ -386,7 +438,7 @@ export default function TransactionDetailsScreen() {
             </View>
           )}
         </ScrollView>
-      </ThemedView>
+      </ContainerComponent>
     </SafeAreaView>
   );
 }

@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
-import { StyleSheet, TouchableOpacity, TextInput, FlatList, View, SafeAreaView, Platform, KeyboardAvoidingView } from 'react-native';
-import { useState, useEffect } from 'react';
+import { StyleSheet, TouchableOpacity, TextInput, FlatList, View, SafeAreaView, Platform, KeyboardAvoidingView, Animated } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/themed-text';
@@ -35,9 +35,26 @@ export default function ModalScreen() {
     'kredyt hipoteczny'
   ]);
 
-  // Simplified - let Expo Router handle animations
+  // Web-specific animations
+  const fadeAnim = useRef(new Animated.Value(Platform.OS === 'web' ? 0 : 1)).current;
+  const slideAnim = useRef(new Animated.Value(Platform.OS === 'web' ? 30 : 0)).current;
+
   useEffect(() => {
-    // No custom animations needed - Expo Router handles this
+    if (Platform.OS === 'web') {
+      // Animate modal entrance on web
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
   }, []);
 
   useEffect(() => {
@@ -52,7 +69,25 @@ export default function ModalScreen() {
   }, [searchQuery]);
 
   const handleClose = () => {
-    router.back();
+    if (Platform.OS === 'web') {
+      // Animate modal exit on web
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 20,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        router.back();
+      });
+    } else {
+      router.back();
+    }
   };
 
   const handleItemPress = (item: typeof mockData[0]) => {
@@ -68,20 +103,43 @@ export default function ModalScreen() {
     setRecentSearches(updatedRecent);
   };
 
-  const renderSearchItem = ({ item }: { item: typeof mockData[0] }) => {
+  const renderSearchItem = ({ item, index }: { item: typeof mockData[0], index: number }) => {
     const isDark = colorScheme === 'dark';
     
+    const itemAnim = useRef(new Animated.Value(0)).current;
+    
+    useEffect(() => {
+      if (Platform.OS === 'web') {
+        Animated.timing(itemAnim, {
+          toValue: 1,
+          duration: 200,
+          delay: index * 50, // Staggered animation
+          useNativeDriver: true,
+        }).start();
+      }
+    }, []);
+    
+    const ItemComponent = Platform.OS === 'web' ? Animated.View : View;
+    const animatedStyle = Platform.OS === 'web' ? {
+      opacity: itemAnim,
+      transform: [{ translateY: itemAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [20, 0]
+      })}]
+    } : {};
+    
     return (
-      <TouchableOpacity 
-        style={[
-          styles.searchItem,
-          { 
-            borderBottomColor: isDark ? '#2C2C2E' : '#E5E5E7',
-            backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF'
-          }
-        ]} 
-        onPress={() => handleItemPress(item)}
-      >
+      <ItemComponent style={animatedStyle}>
+        <TouchableOpacity 
+          style={[
+            styles.searchItem,
+            { 
+              borderBottomColor: isDark ? '#2C2C2E' : '#E5E5E7',
+              backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF'
+            }
+          ]}
+          onPress={() => handleItemPress(item)}
+        >
         <View style={styles.itemContent}>
           <ThemedText style={styles.itemTitle}>{item.title}</ThemedText>
           <ThemedText style={styles.itemDescription}>{item.description}</ThemedText>
@@ -92,18 +150,139 @@ export default function ModalScreen() {
           color={isDark ? '#8E8E93' : '#C7C7CC'} 
         />
       </TouchableOpacity>
+      </ItemComponent>
     );
   };
 
   const isDark = colorScheme === 'dark';
 
-  const containerContent = (
+  const containerContent = Platform.OS === 'web' ? (
+    <Animated.View style={[
+      styles.modalContent,
+      {
+        opacity: fadeAnim,
+        transform: [{ translateY: slideAnim }]
+      }
+    ]}>
+      {/* Scrollable Content */}
+      <View style={styles.scrollableContent}>
+        {searchQuery.length > 0 ? (
+          <FlatList
+            data={filteredData}
+            renderItem={renderSearchItem}
+            keyExtractor={item => item.id}
+            style={styles.searchResults}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+            ListEmptyComponent={
+              <View style={styles.emptyState}>
+                <Ionicons 
+                  name="search" 
+                  size={48} 
+                  color={isDark ? '#3A3A3C' : '#C7C7CC'} 
+                />
+                <ThemedText style={styles.emptyText}>
+                  Nie znaleziono wyników dla "{searchQuery}"
+                </ThemedText>
+              </View>
+            }
+          />
+        ) : (
+          <FlatList
+            data={recentSearches}
+            keyExtractor={(item, index) => index.toString()}
+            style={styles.recentSearchesList}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+            ListHeaderComponent={
+              <ThemedText style={styles.recentSearchesTitle}>
+                Ostatnie wyszukiwania
+              </ThemedText>
+            }
+            renderItem={({ item: searchTerm, index }) => (
+              <TouchableOpacity
+                style={[
+                  styles.recentSearchItem,
+                  { 
+                    borderBottomColor: isDark ? '#2C2C2E' : '#E5E5E7',
+                    backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF'
+                  }
+                ]}
+                onPress={() => handleRecentSearchPress(searchTerm)}
+              >
+                <Ionicons 
+                  name="time-outline" 
+                  size={18} 
+                  color={isDark ? '#8E8E93' : '#8E8E93'} 
+                  style={styles.clockIcon}
+                />
+                <ThemedText style={styles.recentSearchText}>
+                  {searchTerm}
+                </ThemedText>
+                <Ionicons 
+                  name="arrow-up-outline" 
+                  size={16} 
+                  color={isDark ? '#8E8E93' : '#C7C7CC'} 
+                  style={styles.arrowIcon}
+                />
+              </TouchableOpacity>
+            )}
+            ListFooterComponent={
+              <View style={styles.recentSearchesFooter}>
+                <ThemedText style={styles.footerText}>
+                  Wpisz frazę powyżej lub wybierz z ostatnich wyszukiwań
+                </ThemedText>
+              </View>
+            }
+          />
+        )}
+      </View>
+
+      {/* Sticky Search Footer */}
+      <View style={[
+        styles.stickyFooter,
+        { 
+          backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
+          borderTopColor: isDark ? '#2C2C2E' : '#E5E5E7'
+        }
+      ]}>          
+        <View style={styles.footerContainer}>
+          {/* Search Input */}
+          <View style={styles.inputWrapper}>
+            <Ionicons 
+              name="search" 
+              size={20} 
+              color={isDark ? '#8E8E93' : '#8E8E93'} 
+              style={styles.searchIcon}
+            />
+            <TextInput
+              style={[
+                styles.searchInput,
+                { 
+                  backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7',
+                  borderColor: isDark ? '#48484A' : '#C7C7CC',
+                  color: isDark ? '#FFFFFF' : '#000000',
+                }
+              ]}
+              placeholder="Czego szukasz?"
+              placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+          </View>
+          {/* Close button outside input */}
+          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+            <Ionicons name="close" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Animated.View>
+  ) : (
     <View style={[
       styles.modalContent,
       Platform.OS === 'ios' && styles.iosContainer
     ]}>
-
-
         {/* Scrollable Content */}
         <View style={styles.scrollableContent}>
           {searchQuery.length > 0 ? (
