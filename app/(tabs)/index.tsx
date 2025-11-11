@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemedText } from '@/components/themed-text';
 import { BlikLogo } from '@/components/ui/blik-logo';
 import { Link, useRouter } from 'expo-router';
+import { TabHeader } from '@/components/ui/tab-header';
 
 type Card = { id: string; brand: string; number: string; balance: number; type: string; gradient: readonly [string, string, ...string[]]; cvv: string; expiration: string; fullNumber: string };
 
@@ -251,16 +252,12 @@ export default function HomeScreen() {
       >
       
       {/* Header (Safe Area aware) */}
-      <View style={[styles.headerRow, { paddingTop: insets.top + 4 }] }>
-        <View style={styles.headerLeft}>
-          <RNImage source={{ uri: 'https://randomuser.me/api/portraits/women/44.jpg' }} style={styles.avatar} />
-          <ThemedText style={styles.greetingText}>Cześć, Iwona!</ThemedText>
-        </View>
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={[styles.headerIconBtn, { backgroundColor: colors.iconBackground }]}><Ionicons name="call-outline" size={22} color={colors.text} /></TouchableOpacity>
-          <TouchableOpacity style={[styles.headerIconBtn, { backgroundColor: colors.iconBackground }]}><Ionicons name="notifications-outline" size={22} color={colors.text} /></TouchableOpacity>
-        </View>
-      </View>
+      <TabHeader
+        showSearch={true}
+        showAvatar={true}
+        onSearchPress={() => console.log('Search pressed')}
+        onNotificationPress={() => console.log('Notifications pressed')}
+      />
 
       {/* Total balance */}
       <View style={styles.totalRow}>

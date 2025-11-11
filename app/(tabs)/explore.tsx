@@ -1,14 +1,14 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { Platform, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { Collapsible } from '@/components/ui/collapsible';
 import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { TabHeader } from '@/components/ui/tab-header';
 import { Fonts } from '@/constants/theme';
 
 interface MarketplaceCategory {
@@ -246,49 +246,67 @@ export default function ExploreScreen() {
   );
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#F8F9FA', dark: '#1A1A1A' }}
-      headerImage={
-        <ThemedView style={styles.headerImageContainer}>
-          <ThemedText style={styles.headerEmoji}>🛍️</ThemedText>
+    <ThemedView style={styles.container}>
+      <TabHeader
+        showSearch={true}
+        showAvatar={true}
+        onSearchPress={() => console.log('Search pressed')}
+        onNotificationPress={() => console.log('Notifications pressed')}
+      />
+      
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <ThemedView style={styles.heroSection}>
+          <ThemedText style={styles.heroEmoji}>🛍️</ThemedText>
+          <ThemedText style={styles.subtitle}>
+            Odkryj szeroki wybór usług i produktów od zaufanych partnerów
+          </ThemedText>
+
+          <ThemedView style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <ThemedText style={styles.statNumber}>50+</ThemedText>
+              <ThemedText style={styles.statLabel}>partnerów</ThemedText>
+            </View>
+            <View style={styles.statItem}>
+              <ThemedText style={styles.statNumber}>200+</ThemedText>
+              <ThemedText style={styles.statLabel}>produktów</ThemedText>
+            </View>
+            <View style={styles.statItem}>
+              <ThemedText style={styles.statNumber}>95%</ThemedText>
+              <ThemedText style={styles.statLabel}>zadowolenia</ThemedText>
+            </View>
+          </ThemedView>
         </ThemedView>
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Marketplace
-        </ThemedText>
-      </ThemedView>
-      <ThemedText style={styles.subtitle}>
-        Odkryj szeroki wybór usług i produktów od zaufanych partnerów
-      </ThemedText>
 
-      <ThemedView style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <ThemedText style={styles.statNumber}>50+</ThemedText>
-          <ThemedText style={styles.statLabel}>partnerów</ThemedText>
-        </View>
-        <View style={styles.statItem}>
-          <ThemedText style={styles.statNumber}>200+</ThemedText>
-          <ThemedText style={styles.statLabel}>produktów</ThemedText>
-        </View>
-        <View style={styles.statItem}>
-          <ThemedText style={styles.statNumber}>95%</ThemedText>
-          <ThemedText style={styles.statLabel}>zadowolenia</ThemedText>
-        </View>
-      </ThemedView>
-
-      <ThemedView style={styles.categoriesContainer}>
-        {marketplaceData.map(renderCategory)}
-      </ThemedView>
-    </ParallaxScrollView>
+        <ThemedView style={styles.categoriesContainer}>
+          {marketplaceData.map(renderCategory)}
+        </ThemedView>
+      </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 32,
+  },
+  heroSection: {
+    paddingHorizontal: 18,
+    paddingVertical: 24,
+    alignItems: 'center',
+  },
+  heroEmoji: {
+    fontSize: 60,
+    marginBottom: 16,
+  },
   headerImage: {
     color: '#808080',
     bottom: -90,

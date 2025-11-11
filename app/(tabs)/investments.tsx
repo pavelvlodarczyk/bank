@@ -9,6 +9,7 @@ import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { TabHeader } from '@/components/ui/tab-header';
 import { Fonts } from '@/constants/theme';
 
 interface Investment {
@@ -246,10 +247,18 @@ export default function InvestmentsScreen() {
   const totalReturn = getTotalReturn();
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#151718' : '#FFFFFF' }]}
-      contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
-    >
+    <ThemedView style={styles.container}>
+      <TabHeader
+        showSearch={true}
+        showAvatar={true}
+        onSearchPress={() => console.log('Search pressed')}
+        onNotificationPress={() => console.log('Notifications pressed')}
+      />
+      
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+      >
       <ThemedView style={styles.titleContainer}>
         <ThemedText
           type="title"
@@ -298,10 +307,21 @@ export default function InvestmentsScreen() {
         </ThemedView>
       </ThemedView>
     </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 18,
+    paddingBottom: 32,
+  },
   headerImage: {
     color: '#808080',
     bottom: -90,
@@ -570,13 +590,6 @@ const styles = StyleSheet.create({
   investmentDetail: {
     fontSize: 12,
     opacity: 0.5,
-  },
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 18,
-    paddingVertical: 16,
   },
   spacer: {
     height: 24,

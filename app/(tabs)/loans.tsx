@@ -9,6 +9,7 @@ import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { TabHeader } from '@/components/ui/tab-header';
 import { Fonts } from '@/constants/theme';
 
 interface MyLoan {
@@ -128,10 +129,18 @@ export default function LoansScreen() {
   );
 
   return (
-    <ScrollView 
-      style={[loanStyles.container, { backgroundColor: colorScheme === 'dark' ? '#151718' : '#FFFFFF' }]}
-      contentContainerStyle={[loanStyles.scrollContent, { paddingTop: insets.top + 20 }]}
-    >
+    <ThemedView style={loanStyles.container}>
+      <TabHeader
+        showSearch={true}
+        showAvatar={true}
+        onSearchPress={() => console.log('Search pressed')}
+        onNotificationPress={() => console.log('Notifications pressed')}
+      />
+      
+      <ScrollView 
+        style={loanStyles.scrollContainer}
+        contentContainerStyle={loanStyles.scrollContent}
+      >
       <ThemedView style={styles.titleContainer}>
         <ThemedText
           type="title"
@@ -165,6 +174,7 @@ export default function LoansScreen() {
         {myLoans.map(renderLoan)}
       </ThemedView>
     </ScrollView>
+    </ThemedView>
   );
 }
 
@@ -176,6 +186,16 @@ const styles = StyleSheet.create({
 });
 
 const loanStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 18,
+    paddingBottom: 32,
+  },
   headerImageContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -455,13 +475,6 @@ const loanStyles = StyleSheet.create({
     fontSize: 11,
     opacity: 0.7,
     textAlign: 'center',
-  },
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 18,
-    paddingVertical: 16,
   },
   spacer: {
     height: 24,

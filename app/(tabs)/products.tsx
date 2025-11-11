@@ -9,6 +9,7 @@ import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { TabHeader } from '@/components/ui/tab-header';
 import { Fonts } from '@/constants/theme';
 
 interface MyProduct {
@@ -137,11 +138,21 @@ export default function ProductsScreen() {
         color={colorScheme === 'dark' ? '#8E8E93' : '#C7C7CC'}
       />
     </TouchableOpacity>
-  );  return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#151718' : '#FFFFFF' }]}
-      contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
-    >
+  );
+  
+  return (
+    <ThemedView style={styles.container}>
+      <TabHeader
+        showSearch={true}
+        showAvatar={true}
+        onSearchPress={() => console.log('Search pressed')}
+        onNotificationPress={() => console.log('Notifications pressed')}
+      />
+      
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+      >
       <ThemedView style={styles.titleContainer}>
         <ThemedText
           type="title"
@@ -156,10 +167,21 @@ export default function ProductsScreen() {
         {myProducts.map(renderProduct)}
       </ThemedView>
     </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 18,
+    paddingBottom: 32,
+  },
   titleContainer: {
     flexDirection: 'row',
     gap: 8,
@@ -252,13 +274,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     opacity: 0.5,
     fontFamily: 'monospace',
-  },
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 18,
-    paddingVertical: 16,
   },
   spacer: {
     height: 24,
