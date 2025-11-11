@@ -1,7 +1,8 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { StyleSheet, TouchableOpacity, View, SafeAreaView, Platform, ScrollView, Animated } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, SafeAreaView, Platform, ScrollView, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRef, useEffect } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -104,28 +105,20 @@ const mockTransactions: Record<string, Transaction> = {
 export default function TransactionDetailsScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
   
-  // Animation setup for web
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(20)).current;
+  // Animation setup - jednolita animacja wysuwania z dołu (100% wysokości ekranu)
+  const screenHeight = Dimensions.get('window').height;
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
   
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      // Animate modal entrance on web
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
+    // Entry animation - jednolita animacja wysuwania z dołu
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   }, []);
   
   const transaction = mockTransactions[id as keyof typeof mockTransactions];
@@ -144,19 +137,12 @@ export default function TransactionDetailsScreen() {
 
   const handleClose = () => {
     if (Platform.OS === 'web') {
-      // Animate modal exit on web
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 15,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
+      // Exit animation - slide down
+      Animated.timing(slideAnim, {
+        toValue: screenHeight,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
         router.back();
       });
     } else {
@@ -208,20 +194,22 @@ export default function TransactionDetailsScreen() {
     ? [
         styles.container,
         {
-          opacity: fadeAnim,
           transform: [{ translateY: slideAnim }]
         }
       ]
     : styles.container;
 
   return (
-    <SafeAreaView style={[
-      styles.safeArea,
-      { backgroundColor: isDark ? '#000000' : '#fff' }
-    ]}>
-      <ContainerComponent style={containerStyle}>
+    <ContainerComponent style={containerStyle}>
+      <View style={[
+        styles.modalContent,
+        { backgroundColor: isDark ? '#000000' : '#fff' }
+      ]}>
         <View style={[
-          styles.header
+          styles.header,
+          {
+            paddingTop: 16,
+          }
         ]}>
           <TouchableOpacity onPress={handleClose} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
@@ -434,8 +422,8 @@ export default function TransactionDetailsScreen() {
             </View>
           )}
         </ScrollView>
-      </ContainerComponent>
-    </SafeAreaView>
+      </View>
+    </ContainerComponent>
   );
 }
 
@@ -445,6 +433,22 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    ...(Platform.OS === 'web' && {
+      zIndex: 1000,
+      position: 'fixed' as any,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    }),
+  },
+  modalContent: {
+    flex: 1,
+    ...(Platform.OS === 'web' && {
+      marginTop: '10%',
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    }),
   },
   header: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity, Alert, Animated, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Alert, Animated, Platform, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -16,9 +16,9 @@ export default function BlikScreen() {
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isActive, setIsActive] = useState<boolean>(false);
   
-  // Animation values
-  const slideAnim = useRef(new Animated.Value(Platform.OS === 'web' ? 100 : 0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  // Animation values - jednolita animacja wysuwania z dołu (100% wysokości ekranu)
+  const screenHeight = Dimensions.get('window').height;
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
   const codeAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(1)).current;
 
@@ -53,19 +53,12 @@ export default function BlikScreen() {
 
   const handleClose = () => {
     if (Platform.OS === 'web') {
-      // Exit animation
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 100,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
+      // Exit animation - slide down
+      Animated.timing(slideAnim, {
+        toValue: screenHeight,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
         router.back();
       });
     } else {
@@ -82,22 +75,12 @@ export default function BlikScreen() {
 
   // Entry animation and auto-generate code
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      fadeAnim.setValue(1);
-    }
+    // Entry animation - jednolita animacja wysuwania z dołu
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
     
     // Auto-generate BLIK code on modal open
     generateBlikCode();
@@ -109,23 +92,21 @@ export default function BlikScreen() {
     
     if (isActive && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft(time => {
-          if (time <= 1) {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 1) {
             setIsActive(false);
             setBlikCode('');
             return 0;
           }
-          return time - 1;
+          return prevTime - 1;
         });
       }, 1000);
-    } else if (timeLeft === 0) {
-      setIsActive(false);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, timeLeft]);
+  }, [isActive]);
 
   const formatTime = (seconds: number) => {
     return `${seconds}s`;
@@ -136,26 +117,28 @@ export default function BlikScreen() {
   return (
     <Animated.View 
       style={[
-        styles.container, 
-        { backgroundColor: isDark ? '#000000' : '#F5F5F5' },
-        Platform.OS === 'web' && {
-          opacity: fadeAnim,
+        styles.container,
+        {
           transform: [{ translateY: slideAnim }],
         }
       ]}
     >
-      {/* Header */}
       <View style={[
-        styles.header,
-        {
-          paddingTop: insets.top + 16,
-          borderBottomColor: isDark ? '#3A3A3C' : '#E5E5E7'
-        }
+        styles.modalContent, 
+        { backgroundColor: isDark ? '#000000' : '#F5F5F5' }
       ]}>
-        <TouchableOpacity onPress={handleClose} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
-        </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>BLIK</ThemedText>
+        {/* Header */}
+        <View style={[
+          styles.header,
+          {
+            paddingTop: 16,
+            borderBottomColor: isDark ? '#3A3A3C' : '#E5E5E7'
+          }
+        ]}>
+          <TouchableOpacity onPress={handleClose} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
+          </TouchableOpacity>
+          <ThemedText style={styles.headerTitle}>BLIK</ThemedText>
         <View style={styles.placeholder} />
       </View>
 
@@ -256,6 +239,7 @@ export default function BlikScreen() {
           </View>
         </ThemedView>
       </View>
+    </View>
     </Animated.View>
   );
 }
@@ -263,6 +247,22 @@ export default function BlikScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    ...(Platform.OS === 'web' && {
+      zIndex: 1000,
+      position: 'fixed' as any,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    }),
+  },
+  modalContent: {
+    flex: 1,
+    ...(Platform.OS === 'web' && {
+      marginTop: '10%',
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    }),
   },
   header: {
     flexDirection: 'row',
@@ -321,20 +321,23 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     marginBottom: 24,
-    minHeight: 200,
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: 16,
   },
   codeContainer: {
     alignItems: 'center',
     width: '100%',
+    justifyContent: 'center',
   },
+
   codeText: {
     fontSize: 48,
     fontWeight: '700',
-    letterSpacing: 8,
+    letterSpacing: 4,
     marginBottom: 16,
-    fontFamily: 'monospace',
+    lineHeight: 56,
+    textAlign: 'center',
   },
   progressBarContainer: {
     width: '100%',
@@ -371,7 +374,6 @@ const styles = StyleSheet.create({
   placeholderContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 150,
   },
   placeholderText: {
     fontSize: 16,

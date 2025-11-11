@@ -1,5 +1,6 @@
+import React, { useState, useRef, useEffect } from 'react';
 import { Image } from 'expo-image';
-import { Platform, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
+import { Platform, StyleSheet, View, TouchableOpacity, ScrollView, Animated, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { TabHeader } from '@/components/ui/tab-header';
+import { SearchWithAI } from '@/components/ui/search-with-ai';
 import { Fonts } from '@/constants/theme';
 
 interface MyLoan {
@@ -84,6 +86,67 @@ export default function LoansScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
+  
+  // Floating search button state
+  const [isSearchButtonHidden, setIsSearchButtonHidden] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
+  const searchButtonAnim = useRef(new Animated.Value(0)).current;
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  let lastScrollY = 0;
+
+  // Handle search button animation
+  useEffect(() => {
+    const shouldHide = isSearchButtonHidden || isAtBottom;
+    
+    Animated.timing(searchButtonAnim, {
+      toValue: shouldHide ? 1 : 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+  }, [isSearchButtonHidden, isAtBottom]);
+
+  const handleMainScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+    const currentScrollY = contentOffset.y;
+    const scrollDiff = Math.abs(currentScrollY - lastScrollY);
+    const contentHeight = contentSize.height;
+    const screenHeight = layoutMeasurement.height;
+    
+    const SCROLL_THRESHOLD = 30;
+    const MIN_SCROLL_POSITION = 50;
+    const BOTTOM_BOUNCE_THRESHOLD = 50;
+    
+    if (scrollDiff < SCROLL_THRESHOLD) return;
+    
+    const isInTopBounce = currentScrollY < 0;
+    const isInBottomBounce = currentScrollY > (contentHeight - screenHeight + BOTTOM_BOUNCE_THRESHOLD);
+    
+    if (isInTopBounce || isInBottomBounce) return;
+    
+    const scrollDirection = currentScrollY > lastScrollY ? 'down' : 'up';
+    const BOTTOM_THRESHOLD = 100;
+    const isNearBottom = currentScrollY >= (contentHeight - screenHeight - BOTTOM_THRESHOLD);
+    
+    setIsAtBottom(isNearBottom);
+    
+    if (scrollTimeout.current) {
+      clearTimeout(scrollTimeout.current);
+    }
+    
+    if (scrollDirection === 'down' && currentScrollY > MIN_SCROLL_POSITION && !isInBottomBounce) {
+      setIsSearchButtonHidden(true);
+    } else if (scrollDirection === 'up' && currentScrollY >= 0 && !isInTopBounce) {
+      setIsSearchButtonHidden(false);
+    }
+    
+    scrollTimeout.current = setTimeout(() => {
+      // Reset scrolling state if needed
+    }, 200);
+    
+    if (!isInTopBounce && !isInBottomBounce) {
+      lastScrollY = currentScrollY;
+    }
+  };
 
   const getTypeLabel = (type: string) => {
     switch (type) {
@@ -143,6 +206,8 @@ export default function LoansScreen() {
       <ScrollView 
         style={loanStyles.scrollContainer}
         contentContainerStyle={loanStyles.scrollContent}
+        onScroll={handleMainScroll}
+        scrollEventThrottle={16}
       >
       <ThemedView style={styles.titleContainer}>
         <ThemedText
@@ -176,7 +241,29 @@ export default function LoansScreen() {
       <ThemedView style={loanStyles.loansContainer}>
         {myLoans.map(renderLoan)}
       </ThemedView>
+      
+      <View style={styles.searchWrapper}>
+        <SearchWithAI />
+      </View>
     </ScrollView>
+    
+    {/* Floating Search Button */}
+    <Animated.View
+      style={[
+        styles.fixedSearchWrapper, 
+        { 
+          bottom: 10,
+          transform: [{
+            translateY: searchButtonAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 100],
+            })
+          }]
+        }
+      ]}
+    >
+      <SearchWithAI />
+    </Animated.View>
     </ThemedView>
   );
 }
@@ -185,7 +272,20 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     gap: 8,
-  }
+  },
+  searchWrapper: {
+    paddingHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  fixedSearchWrapper: { 
+    position: 'absolute', 
+    left: 0, 
+    right: 0, 
+    paddingHorizontal: 18, 
+    paddingTop: 8, 
+    paddingBottom: 4 
+  },
 });
 
 const loanStyles = StyleSheet.create({

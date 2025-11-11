@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { BlikLogo } from '@/components/ui/blik-logo';
 import { Link, useRouter } from 'expo-router';
 import { TabHeader } from '@/components/ui/tab-header';
+import { SearchWithAI } from '@/components/ui/search-with-ai';
 
 type Card = { id: string; brand: string; number: string; balance: number; type: string; gradient: readonly [string, string, ...string[]]; cvv: string; expiration: string; fullNumber: string };
 
@@ -233,7 +234,7 @@ export default function HomeScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       {/* Gradient overlay under notch/Dynamic Island */}
-      {insets.top > 20 && (
+      {insets.top > 20 && Platform.OS !== 'web' && (
         <LinearGradient
           colors={colorScheme === 'dark' 
             ? ['#000000BB', '#1E1E1E88', '#1E1E1E55', '#1E1E1E22', '#1E1E1E00'] 
@@ -504,21 +505,7 @@ export default function HomeScreen() {
 
       {/* Static Search Button at Bottom of Content */}
       <View style={styles.staticSearchWrapper}>
-        <Link href="/modal" asChild>
-          <TouchableOpacity style={styles.searchButton}>
-            <LinearGradient
-              colors={['#7B61FF', '#5B42E6', '#00A86B', '#FF6B6B']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.searchButtonGradient}
-            >
-              <View style={[styles.searchButtonContent, { backgroundColor: colors.inputBackground }]}>
-                <Ionicons name="search" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
-                <Text style={[styles.searchButtonText, { color: colors.textSecondary }]}>Szukaj z AI</Text>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Link>
+        <SearchWithAI />
       </View>
       </ScrollView>
       
@@ -537,21 +524,7 @@ export default function HomeScreen() {
           }
         ]}
       >
-        <Link href="/modal" asChild>
-          <TouchableOpacity style={styles.searchButton}>
-            <LinearGradient
-              colors={['#7B61FF', '#5B42E6', '#00A86B', '#FF6B6B']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.searchButtonGradient}
-            >
-              <View style={[styles.searchButtonContent, { backgroundColor: colors.inputBackground }]}>
-                <Ionicons name="search" size={16} color={colors.textSecondary} style={{ marginRight: 6 }} />
-                <Text style={[styles.searchButtonText, { color: colors.textSecondary }]}>Szukaj z AI</Text>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Link>
+        <SearchWithAI />
       </Animated.View>
 
 
@@ -572,18 +545,7 @@ const styles = StyleSheet.create({
   greetingText: { fontSize: 18, fontWeight: '600' },
   headerRight: { flexDirection: 'row', alignItems: 'center' },
   headerIconBtn: { borderRadius: 16, padding: 8, marginLeft: 10 },
-  searchButton: { alignSelf: 'center' },
-  searchButtonGradient: { 
-    borderRadius: 20, 
-    padding: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  searchButtonContent: { flexDirection: 'row', alignItems: 'center', borderRadius: 18, paddingHorizontal: 16, paddingVertical: 10 },
-  searchButtonText: { fontSize: 14, fontWeight: '500' },
+
   totalRow: { paddingHorizontal: 18, marginBottom: 18 },
   totalLabel: { fontSize: 13 },
   totalAmountRow: { flexDirection: 'row', alignItems: 'center' },

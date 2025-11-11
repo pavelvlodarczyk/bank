@@ -8,7 +8,8 @@ import {
   Platform, 
   TextInput, 
   ScrollView,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,28 +31,18 @@ export default function TransferScreen() {
   const [title, setTitle] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
-  // Animation values
-  const slideAnim = useRef(new Animated.Value(Platform.OS === 'web' ? 100 : 0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  // Animation values - jednolita animacja wysuwania z dołu (100% wysokości ekranu)
+  const screenHeight = Dimensions.get('window').height;
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
 
   // Entry animation
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      fadeAnim.setValue(1);
-    }
+    // Entry animation - jednolita animacja wysuwania z dołu
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   // Auto-fill form from URL parameters
@@ -69,19 +60,12 @@ export default function TransferScreen() {
 
   const handleClose = () => {
     if (Platform.OS === 'web') {
-      // Exit animation
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 100,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
+      // Exit animation - slide down
+      Animated.timing(slideAnim, {
+        toValue: screenHeight,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
         router.back();
       });
     } else {
@@ -188,23 +172,25 @@ export default function TransferScreen() {
   return (
     <Animated.View 
       style={[
-        styles.container, 
-        { backgroundColor: isDark ? '#000000' : '#F5F5F5' },
-        Platform.OS === 'web' && {
-          opacity: fadeAnim,
+        styles.container,
+        {
           transform: [{ translateY: slideAnim }],
         }
       ]}
     >
-      <KeyboardAvoidingView 
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+      <View style={[
+        styles.modalContent, 
+        { backgroundColor: isDark ? '#000000' : '#F5F5F5' }
+      ]}>
+        <KeyboardAvoidingView 
+          style={styles.keyboardView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
         {/* Header */}
         <View style={[
           styles.header, 
           { 
-            paddingTop: insets.top + 16,
+            paddingTop: 16,
             borderBottomColor: isDark ? '#3A3A3C' : '#E5E5E7'
           }
         ]}>
@@ -214,7 +200,7 @@ export default function TransferScreen() {
           >
             <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>Przelew krajowy</ThemedText>
+          <ThemedText style={styles.headerTitle}>Przelew</ThemedText>
           <View style={styles.placeholder} />
         </View>
 
@@ -340,6 +326,7 @@ export default function TransferScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      </View>
     </Animated.View>
   );
 }
@@ -347,6 +334,22 @@ export default function TransferScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    ...(Platform.OS === 'web' && {
+      zIndex: 1000,
+      position: 'fixed' as any,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    }),
+  },
+  modalContent: {
+    flex: 1,
+    ...(Platform.OS === 'web' && {
+      marginTop: '10%',
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    }),
   },
   keyboardView: {
     flex: 1,

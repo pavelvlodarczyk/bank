@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView, Alert, Animated, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ScrollView, Alert, Animated, Platform, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,11 +25,9 @@ export default function CardDetailsScreen() {
   const router = useRouter();
   const [isCardLocked, setIsCardLocked] = useState(false);
   
-  // Animation values - animacja z dołu jak w transaction-details
-  const slideAnim = useRef(new Animated.Value(Platform.OS === 'web' ? 100 : 0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const cardSlideAnim = useRef(new Animated.Value(Platform.OS === 'web' ? 50 : 0)).current;
-  const actionsSlideAnim = useRef(new Animated.Value(Platform.OS === 'web' ? 30 : 0)).current;
+  // Animation values - jednolita animacja wysuwania z dołu (100% wysokości ekranu)
+  const screenHeight = Dimensions.get('window').height;
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
 
   const handleLockCard = () => {
     Alert.alert(
@@ -56,18 +54,11 @@ export default function CardDetailsScreen() {
   const handleClose = () => {
     if (Platform.OS === 'web') {
       // Exit animation - slide down
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 100,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
+      Animated.timing(slideAnim, {
+        toValue: screenHeight,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
         router.back();
       });
     } else {
@@ -75,38 +66,13 @@ export default function CardDetailsScreen() {
     }
   };
 
-  // Entry animation
+  // Entry animation - jednolita animacja wysuwania z dołu
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardSlideAnim, {
-          toValue: 0,
-          duration: 400,
-          delay: 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(actionsSlideAnim, {
-          toValue: 0,
-          duration: 400,
-          delay: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      fadeAnim.setValue(1);
-      cardSlideAnim.setValue(0);
-      actionsSlideAnim.setValue(0);
-    }
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   const isDark = colorScheme === 'dark';
@@ -114,41 +80,37 @@ export default function CardDetailsScreen() {
   return (
     <Animated.View 
       style={[
-        styles.container, 
-        { backgroundColor: isDark ? '#000000' : '#F5F5F5' },
-        Platform.OS === 'web' && {
-          opacity: fadeAnim,
+        styles.container,
+        {
           transform: [{ translateY: slideAnim }],
         }
       ]}
     >
-      {/* Header */}
       <View style={[
-        styles.header,
-        {
-          paddingTop: insets.top + 16,
-        }
+        styles.modalContent, 
+        { backgroundColor: isDark ? '#000000' : '#F5F5F5' }
       ]}>
-        <TouchableOpacity onPress={handleClose} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
-        </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Detail Card</ThemedText>
-        <View style={styles.placeholder} />
-      </View>
+        {/* Header */}
+        <View style={[
+          styles.header,
+          {
+            paddingTop: 16,
+          }
+        ]}>
+          <TouchableOpacity onPress={handleClose} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
+          </TouchableOpacity>
+          <ThemedText style={styles.headerTitle}>Detail Card</ThemedText>
+          <View style={styles.placeholder} />
+        </View>
 
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Card */}
-      <Animated.View 
-        style={[
-          styles.cardContainer,
-          Platform.OS === 'web' && {
-            opacity: fadeAnim,
-            transform: [{ translateY: cardSlideAnim }],
-          }
-        ]}
+      <View 
+        style={styles.cardContainer}
       >
         <LinearGradient
           colors={cardData.gradient}
@@ -180,18 +142,10 @@ export default function CardDetailsScreen() {
             <View style={[styles.masterCardCircle, { backgroundColor: '#F79E1B', marginLeft: -12 }]} />
           </View>
         </LinearGradient>
-      </Animated.View>
+      </View>
 
       {/* Action Buttons */}
-      <Animated.View 
-        style={[
-          styles.actionsContainer,
-          Platform.OS === 'web' && {
-            opacity: fadeAnim,
-            transform: [{ translateY: actionsSlideAnim }],
-          }
-        ]}
-      >
+      <View style={styles.actionsContainer}>
         <TouchableOpacity style={styles.actionButton} onPress={handleLockCard}>
           <View style={[styles.actionIcon, { backgroundColor: isCardLocked ? '#FF3B30' : '#4A3A7A' }]}>
             <Ionicons 
@@ -218,7 +172,7 @@ export default function CardDetailsScreen() {
           </View>
           <ThemedText style={styles.actionLabel}>Setting Card</ThemedText>
         </TouchableOpacity>
-      </Animated.View>
+      </View>
 
       {/* Card Information */}
       <ThemedView style={styles.infoSection}>
@@ -255,11 +209,28 @@ export default function CardDetailsScreen() {
         </View>
       </ThemedView>
     </ScrollView>
+    </View>
     </Animated.View>
   );
 }const styles = StyleSheet.create({
   container: {
     flex: 1,
+    ...(Platform.OS === 'web' && {
+      zIndex: 1000,
+      position: 'fixed' as any,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    }),
+  },
+  modalContent: {
+    flex: 1,
+    ...(Platform.OS === 'web' && {
+      marginTop: '10%',
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    }),
   },
   header: {
     flexDirection: 'row',
