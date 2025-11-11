@@ -40,7 +40,7 @@ export function TabHeader({
         {showAvatar && (
           <TouchableOpacity onPress={onAvatarPress} style={styles.avatarContainer}>
             <RNImage 
-              source={{ uri: 'https://randomuser.me/api/portraits/women/44.jpg' }} 
+              source={{ uri: 'https://randomuser.me/api/portraits/women/10.jpg' }} 
               style={styles.avatar} 
             />
             <ThemedText style={styles.greetingText}>Cześć, Iwona!</ThemedText>

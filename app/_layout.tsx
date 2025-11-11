@@ -26,7 +26,7 @@ export default function RootLayout() {
           <Stack.Screen 
             name="modal" 
             options={{ 
-              presentation: 'modal',
+              presentation: Platform.OS === 'web' ? 'transparentModal' : 'modal',
               title: 'Szukaj z AI',
               headerShown: false,
               animation: 'slide_from_bottom',

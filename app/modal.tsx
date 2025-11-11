@@ -1,7 +1,8 @@
 import { useRouter } from 'expo-router';
-import { StyleSheet, TouchableOpacity, TextInput, FlatList, View, SafeAreaView, Platform, KeyboardAvoidingView, Animated } from 'react-native';
+import { StyleSheet, TouchableOpacity, TextInput, FlatList, View, SafeAreaView, Platform, KeyboardAvoidingView, Animated, Dimensions } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -24,6 +25,7 @@ const mockData = [
 export default function ModalScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState(mockData);
   const [recentSearches, setRecentSearches] = useState([
@@ -35,26 +37,17 @@ export default function ModalScreen() {
     'kredyt hipoteczny'
   ]);
 
-  // Web-specific animations
-  const fadeAnim = useRef(new Animated.Value(Platform.OS === 'web' ? 0 : 1)).current;
-  const slideAnim = useRef(new Animated.Value(Platform.OS === 'web' ? 30 : 0)).current;
+  // Animation values - jednolita animacja wysuwania z dołu (100% wysokości ekranu)
+  const screenHeight = Dimensions.get('window').height;
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
 
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      // Animate modal entrance on web
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
+    // Entry animation - jednolita animacja wysuwania z dołu
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   useEffect(() => {
@@ -70,19 +63,12 @@ export default function ModalScreen() {
 
   const handleClose = () => {
     if (Platform.OS === 'web') {
-      // Animate modal exit on web
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 20,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
+      // Exit animation - slide down
+      Animated.timing(slideAnim, {
+        toValue: screenHeight,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
         router.back();
       });
     } else {
@@ -106,39 +92,13 @@ export default function ModalScreen() {
   const renderSearchItem = ({ item, index }: { item: typeof mockData[0], index: number }) => {
     const isDark = colorScheme === 'dark';
     
-    const itemAnim = useRef(new Animated.Value(0)).current;
-    
-    useEffect(() => {
-      if (Platform.OS === 'web') {
-        Animated.timing(itemAnim, {
-          toValue: 1,
-          duration: 200,
-          delay: index * 50, // Staggered animation
-          useNativeDriver: true,
-        }).start();
-      }
-    }, []);
-    
-    const ItemComponent = Platform.OS === 'web' ? Animated.View : View;
-    const animatedStyle = Platform.OS === 'web' ? {
-      opacity: itemAnim,
-      transform: [{ translateY: itemAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [20, 0]
-      })}]
-    } : {};
-    
     return (
-      <ItemComponent style={animatedStyle}>
-        <TouchableOpacity 
-          style={[
-            styles.searchItem,
-            {
-              backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF'
-            }
-          ]}
-          onPress={() => handleItemPress(item)}
-        >
+      <TouchableOpacity 
+        style={[
+          styles.searchItem
+        ]}
+        onPress={() => handleItemPress(item)}
+      >
         <View style={styles.itemContent}>
           <ThemedText style={styles.itemTitle}>{item.title}</ThemedText>
           <ThemedText style={styles.itemDescription}>{item.description}</ThemedText>
@@ -149,105 +109,35 @@ export default function ModalScreen() {
           color={isDark ? '#8E8E93' : '#C7C7CC'} 
         />
       </TouchableOpacity>
-      </ItemComponent>
     );
-  };
+  };  const isDark = colorScheme === 'dark';
 
-  const isDark = colorScheme === 'dark';
-
-  const containerContent = Platform.OS === 'web' ? (
-    <Animated.View style={[
-      styles.modalContent,
-      {
-        opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }]
-      }
-    ]}>
-      {/* Scrollable Content */}
-      <View style={styles.scrollableContent}>
-        {searchQuery.length > 0 ? (
-          <FlatList
-            data={filteredData}
-            renderItem={renderSearchItem}
-            keyExtractor={item => item.id}
-            style={styles.searchResults}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContent}
-            ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons 
-                  name="search" 
-                  size={48} 
-                  color={isDark ? '#3A3A3C' : '#C7C7CC'} 
-                />
-                <ThemedText style={styles.emptyText}>
-                  Nie znaleziono wyników dla "{searchQuery}"
-                </ThemedText>
-              </View>
-            }
-          />
-        ) : (
-          <FlatList
-            data={recentSearches}
-            keyExtractor={(item, index) => index.toString()}
-            style={styles.recentSearchesList}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContent}
-            ListHeaderComponent={
-              <ThemedText style={styles.recentSearchesTitle}>
-                Ostatnie wyszukiwania
-              </ThemedText>
-            }
-            renderItem={({ item: searchTerm, index }) => (
-              <TouchableOpacity
-                style={[
-                  styles.recentSearchItem,
-                  { 
-                    borderBottomColor: isDark ? '#2C2C2E' : '#E5E5E7',
-                    backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF'
-                  }
-                ]}
-                onPress={() => handleRecentSearchPress(searchTerm)}
-              >
-                <Ionicons 
-                  name="time-outline" 
-                  size={18} 
-                  color={isDark ? '#8E8E93' : '#8E8E93'} 
-                  style={styles.clockIcon}
-                />
-                <ThemedText style={styles.recentSearchText}>
-                  {searchTerm}
-                </ThemedText>
-                <Ionicons 
-                  name="arrow-up-outline" 
-                  size={16} 
-                  color={isDark ? '#8E8E93' : '#C7C7CC'} 
-                  style={styles.arrowIcon}
-                />
-              </TouchableOpacity>
-            )}
-            ListFooterComponent={
-              <View style={styles.recentSearchesFooter}>
-                <ThemedText style={styles.footerText}>
-                  Wpisz frazę powyżej lub wybierz z ostatnich wyszukiwań
-                </ThemedText>
-              </View>
-            }
-          />
-        )}
-      </View>
-
-      {/* Sticky Search Footer */}
-      <View style={[
-        styles.stickyFooter,
-        { 
-          backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
-          borderTopColor: isDark ? '#2C2C2E' : '#E5E5E7'
+  return (
+    <Animated.View 
+      style={[
+        styles.container,
+        {
+          transform: [{ translateY: slideAnim }],
+          overflow: 'visible',
         }
-      ]}>          
-        <View style={styles.footerContainer}>
-          {/* Search Input */}
-          <View style={styles.inputWrapper}>
+      ]}
+    >
+      <View style={[
+        styles.modalContent, 
+        { backgroundColor: isDark ? '#000000' : '#F5F5F5' }
+      ]}>
+        {/* Header with Search Input */}
+        <View style={[
+          styles.header,
+          {
+            paddingTop: 16,
+            borderBottomColor: isDark ? '#3A3A3C' : '#E5E5E7'
+          }
+        ]}>
+          <TouchableOpacity onPress={handleClose} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
+          </TouchableOpacity>
+          <View style={styles.searchInputContainer}>
             <Ionicons 
               name="search" 
               size={20} 
@@ -256,10 +146,9 @@ export default function ModalScreen() {
             />
             <TextInput
               style={[
-                styles.searchInput,
+                styles.headerSearchInput,
                 { 
                   backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7',
-                  borderColor: isDark ? '#48484A' : '#C7C7CC',
                   color: isDark ? '#FFFFFF' : '#000000',
                 }
               ]}
@@ -270,20 +159,11 @@ export default function ModalScreen() {
               autoFocus
             />
           </View>
-          {/* Close button outside input */}
-          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
-          </TouchableOpacity>
+          <View style={styles.placeholder} />
         </View>
-      </View>
-    </Animated.View>
-  ) : (
-    <View style={[
-      styles.modalContent,
-      Platform.OS === 'ios' && styles.iosContainer
-    ]}>
-        {/* Scrollable Content */}
-        <View style={styles.scrollableContent}>
+
+        {/* Content */}
+        <View style={styles.content}>
           {searchQuery.length > 0 ? (
             <FlatList
               data={filteredData}
@@ -323,7 +203,6 @@ export default function ModalScreen() {
                     styles.recentSearchItem,
                     { 
                       borderBottomColor: isDark ? '#2C2C2E' : '#E5E5E7',
-                      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF'
                     }
                   ]}
                   onPress={() => handleRecentSearchPress(searchTerm)}
@@ -348,71 +227,15 @@ export default function ModalScreen() {
               ListFooterComponent={
                 <View style={styles.recentSearchesFooter}>
                   <ThemedText style={styles.footerText}>
-                    Wpisz frazę powyżej lub wybierz z ostatnich wyszukiwań
+                    Wpisz frazę w polu wyszukiwania powyżej lub wybierz z ostatnich wyszukiwań
                   </ThemedText>
                 </View>
               }
             />
           )}
         </View>
-
-        {/* Sticky Search Footer */}
-        <View style={[
-          styles.stickyFooter,
-          { 
-            backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
-            borderTopColor: isDark ? '#2C2C2E' : '#E5E5E7'
-          }
-        ]}>          
-          <View style={styles.footerContainer}>
-            {/* Search Input */}
-            <View style={styles.inputWrapper}>
-              <Ionicons 
-                name="search" 
-                size={20} 
-                color={isDark ? '#8E8E93' : '#8E8E93'} 
-                style={styles.searchIcon}
-              />
-              <TextInput
-                style={[
-                  styles.searchInput,
-                  { 
-                    backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7',
-                    borderColor: isDark ? '#48484A' : '#C7C7CC',
-                    color: isDark ? '#FFFFFF' : '#000000',
-                  }
-                ]}
-                placeholder="Czego szukasz?"
-                placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                autoFocus
-              />
-            </View>
-            {/* Close button outside input */}
-            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
-            </TouchableOpacity>
-          </View>
-        </View>
-    </View>
-  );
-
-  return (
-    <SafeAreaView style={[
-      styles.safeArea,
-      { backgroundColor: isDark ? '#000000' : '#fff' }
-    ]}>
-      <KeyboardAvoidingView 
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-      >
-        <ThemedView style={styles.container}>
-          {containerContent}
-        </ThemedView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </View>
+    </Animated.View>
   );
 }
 
@@ -425,9 +248,67 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    ...(Platform.OS === 'web' && {
+      zIndex: 1000,
+      position: 'fixed' as any,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    }),
   },
   modalContent: {
     flex: 1,
+    ...(Platform.OS === 'web' && {
+      marginTop: '10%',
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    }),
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  backButton: {
+    padding: 10,
+    borderRadius: 22,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(142, 142, 147, 0.12)',
+  },
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 12,
+    position: 'relative',
+  },
+  headerSearchInput: {
+    flex: 1,
+    height: 40,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingLeft: 40,
+    fontSize: 16,
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 12,
+    zIndex: 1,
+  },
+  placeholder: {
+    width: 40,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
   },
   iosContainer: {
     marginTop: Platform.OS === 'ios' ? 20 : 0,
@@ -455,7 +336,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingHorizontal: 20,
     paddingBottom: 20,
   },
   recentSearchesList: {
@@ -472,27 +352,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingTop: 4,
   },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    position: 'relative',
-  },
-  searchIcon: {
-    position: 'absolute',
-    left: 20,
-    zIndex: 1,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 18,
-    paddingVertical: 10,
-    paddingLeft: 56,
-    paddingRight: 16,
-    borderRadius: 12,
-    borderWidth: 2,
-    height: 44,
-  },
+
   clearButton: {
     position: 'absolute',
     right: 16,

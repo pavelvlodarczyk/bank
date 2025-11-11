@@ -42,9 +42,9 @@ const recipients = [
   { id: 'new', label: 'Przelew', icon: 'add' as const },
   { id: 'ry', label: 'Rina Y.', text: 'RY' },
   { id: 'dad', label: 'Tata', text: 'Dad' },
-  { id: 'ksu', label: 'Kasia B.', uri: 'https://randomuser.me/api/portraits/women/65.jpg' },
-  { id: 'mum', label: 'Mama', uri: 'https://randomuser.me/api/portraits/women/66.jpg' },
-  { id: 'die', label: 'Diana E.', uri: 'https://randomuser.me/api/portraits/women/67.jpg' },
+  { id: 'ksu', label: 'Kasia', uri: 'https://randomuser.me/api/portraits/women/65.jpg' },
+  { id: 'mum', label: 'Mama', uri: 'https://randomuser.me/api/portraits/women/44.jpg' },
+  { id: 'die', label: 'Diana', uri: 'https://randomuser.me/api/portraits/women/67.jpg' },
 ];
 
 export default function HomeScreen() {
