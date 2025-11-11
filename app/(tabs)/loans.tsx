@@ -13,6 +13,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { TabHeader } from '@/components/ui/tab-header';
 import { SearchWithAI } from '@/components/ui/search-with-ai';
 import { Fonts } from '@/constants/theme';
+import { TotalBalance } from '@/components/ui/total-balance';
 
 interface MyLoan {
   id: string;
@@ -219,25 +220,26 @@ export default function LoansScreen() {
         </ThemedText>
       </ThemedView>
       <View style={loanStyles.spacer} />
+      <TotalBalance
+        amount={134232}
+        label="Łączne zadłużenie"
+        onPress={() => {
+          console.log('Total balance pressed');
+          // Tutaj można dodać nawigację do szczegółów salda
+        }}
+      />
+      <TotalBalance
+        amount={5600}
+        label="Miesięczne raty"
+        onPress={() => {
+          console.log('Total balance pressed');
+          // Tutaj można dodać nawigację do szczegółów salda
+        }}
+      />
+      <View style={loanStyles.spacer} />
       <ThemedText style={loanStyles.subtitle}>
         Zarządzaj swoimi aktywnymi kredytami i płatnościami
       </ThemedText>
-
-      <ThemedView style={loanStyles.statsContainer}>
-        <ThemedView style={loanStyles.statItem}>
-          <ThemedText style={loanStyles.statNumber}>3</ThemedText>
-          <ThemedText style={loanStyles.statLabel}>aktywnych kredytów</ThemedText>
-        </ThemedView>
-        <ThemedView style={loanStyles.statItem}>
-          <ThemedText style={loanStyles.statNumber}>442,130 zł</ThemedText>
-          <ThemedText style={loanStyles.statLabel}>łączne zadłużenie</ThemedText>
-        </ThemedView>
-        <ThemedView style={loanStyles.statItem}>
-          <ThemedText style={loanStyles.statNumber}>5,025 zł</ThemedText>
-          <ThemedText style={loanStyles.statLabel}>miesięczne raty</ThemedText>
-        </ThemedView>
-      </ThemedView>
-
       <ThemedView style={loanStyles.loansContainer}>
         {myLoans.map(renderLoan)}
       </ThemedView>
@@ -559,25 +561,6 @@ const loanStyles = StyleSheet.create({
   detailValue: {
     fontSize: 13,
     fontWeight: '500',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 32,
-    paddingVertical: 16,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 20,
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 11,
-    opacity: 0.7,
-    textAlign: 'center',
   },
   spacer: {
     height: 24,

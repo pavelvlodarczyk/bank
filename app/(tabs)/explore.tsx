@@ -326,27 +326,19 @@ export default function ExploreScreen() {
         onScroll={handleMainScroll}
         scrollEventThrottle={16}
       >
-        <ThemedView style={styles.heroSection}>
-          <ThemedText style={styles.heroEmoji}>🛍️</ThemedText>
-          <ThemedText style={styles.subtitle}>
-            Odkryj szeroki wybór usług i produktów od zaufanych partnerów
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText
+            type="title"
+            style={{
+              fontFamily: Fonts.rounded,
+            }}>
+            Marketplace
           </ThemedText>
-
-          <ThemedView style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <ThemedText style={styles.statNumber}>50+</ThemedText>
-              <ThemedText style={styles.statLabel}>partnerów</ThemedText>
-            </View>
-            <View style={styles.statItem}>
-              <ThemedText style={styles.statNumber}>200+</ThemedText>
-              <ThemedText style={styles.statLabel}>produktów</ThemedText>
-            </View>
-            <View style={styles.statItem}>
-              <ThemedText style={styles.statNumber}>95%</ThemedText>
-              <ThemedText style={styles.statLabel}>zadowolenia</ThemedText>
-            </View>
-          </ThemedView>
         </ThemedView>
+        <View style={styles.spacer} />
+        <ThemedText style={styles.subtitle}>
+          Odkryj szeroki wybór usług i produktów od zaufanych partnerów
+        </ThemedText>
 
         <ThemedView style={styles.categoriesContainer}>
           {marketplaceData.map(renderCategory)}
@@ -436,25 +428,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 24,
     opacity: 0.8,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 32,
-    paddingVertical: 16,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    opacity: 0.7,
-    textAlign: 'center',
   },
   categoriesContainer: {
     gap: 32,
@@ -636,5 +609,8 @@ const styles = StyleSheet.create({
   productDetail: {
     fontSize: 12,
     opacity: 0.5,
+  },
+  spacer: {
+    height: 24,
   },
 });

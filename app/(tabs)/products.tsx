@@ -231,6 +231,7 @@ export default function ProductsScreen() {
           Produkty
         </ThemedText>
       </ThemedView>
+      <View style={styles.spacer} />
       <TotalBalance
         amount={34534}
         onPress={() => {

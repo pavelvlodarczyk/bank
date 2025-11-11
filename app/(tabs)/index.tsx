@@ -274,7 +274,7 @@ export default function HomeScreen() {
             // Tutaj można dodać nawigację do szczegółów salda
           }}
         />
-      </View>>
+      </View>
 
       {/* Cards carousel */}
       <ScrollView

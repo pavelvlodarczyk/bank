@@ -13,6 +13,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { TabHeader } from '@/components/ui/tab-header';
 import { SearchWithAI } from '@/components/ui/search-with-ai';
 import { Fonts } from '@/constants/theme';
+import { TotalBalance } from '@/components/ui/total-balance';
 
 interface Investment {
   id: string;
@@ -337,29 +338,25 @@ export default function InvestmentsScreen() {
         </ThemedText>
       </ThemedView>
       <View style={styles.spacer} />
+      <TotalBalance
+        amount={98303}
+        label="Wartość całkowita"
+        onPress={() => {
+          console.log('Total balance pressed');
+          // Tutaj można dodać nawigację do szczegółów salda
+        }}
+      />
+      <TotalBalance
+        amount={+2600}
+        label="Zysk"
+        onPress={() => {
+          console.log('Total balance pressed');
+          // Tutaj można dodać nawigację do szczegółów salda
+        }}
+      />
       <ThemedText style={styles.subtitle}>
         Zarządzaj swoim portfelem i odkrywaj nowe możliwości inwestycyjne
       </ThemedText>
-
-      <ThemedView style={styles.portfolioSummary}>
-        <ThemedText style={styles.summaryTitle}>Mój portfel</ThemedText>
-        <ThemedView style={styles.summaryStats}>
-          <View style={styles.summaryItem}>
-            <ThemedText style={styles.summaryLabel}>Wartość całkowita</ThemedText>
-            <ThemedText style={styles.summaryValue}>
-              {getTotalValue().toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł
-            </ThemedText>
-          </View>
-          <View style={styles.summaryItem}>
-            <ThemedText style={styles.summaryLabel}>Zysk/Strata</ThemedText>
-            <ThemedText style={[styles.summaryValue, { 
-              color: parseFloat(totalReturn.percentage) >= 0 ? '#34C759' : '#FF3B30' 
-            }]}>
-              {parseFloat(totalReturn.percentage) >= 0 ? '+' : ''}{totalReturn.amount} zł ({totalReturn.percentage}%)
-            </ThemedText>
-          </View>
-        </ThemedView>
-      </ThemedView>
 
       <ThemedView style={styles.section}>
         <ThemedText style={styles.sectionTitle}>Moje inwestycje</ThemedText>
@@ -451,32 +448,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 24,
     opacity: 0.8,
-  },
-  portfolioSummary: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 24,
-  },
-  summaryTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  summaryStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  summaryItem: {
-    flex: 1,
-  },
-  summaryLabel: {
-    fontSize: 12,
-    opacity: 0.6,
-    marginBottom: 4,
-  },
-  summaryValue: {
-    fontSize: 16,
-    fontWeight: '700',
   },
   section: {
     marginBottom: 32,

@@ -6,6 +6,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 interface TotalBalanceProps {
   amount: number;
   currency?: string;
+  label?: string;
   onPress?: () => void;
 }
 
@@ -14,7 +15,7 @@ const getColors = (colorScheme: 'light' | 'dark' | null | undefined) => ({
   textSecondary: colorScheme === 'dark' ? '#B0B0B0' : '#4C4C4C',
 });
 
-export function TotalBalance({ amount, currency = 'PLN', onPress }: TotalBalanceProps) {
+export function TotalBalance({ amount, currency = 'PLN', label = 'Łączne saldo', onPress }: TotalBalanceProps) {
   const colorScheme = useColorScheme();
   const colors = getColors(colorScheme);
 
@@ -29,7 +30,7 @@ export function TotalBalance({ amount, currency = 'PLN', onPress }: TotalBalance
     <View style={styles.totalRow}>
       <View>
         <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>
-          Łączne saldo
+          {label}
         </Text>
         <View style={styles.totalAmountRow}>
           <Text style={[styles.totalAmount, { color: colors.text }]}>
