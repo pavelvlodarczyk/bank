@@ -13,9 +13,9 @@ const cardData = {
   maskedNumber: '1268 7068 2265 5248',
   expirationDate: '10/08/2024',
   cvv: '123',
-  cardholderName: 'CHROVA CHRISTIE ADELAKLE',
+  cardholderName: 'IWONA KOWALSKA',
   bankName: 'Bank Name',
-  cardType: 'Debit',
+  cardType: 'Credit Card',
   gradient: ['#4F46E5', '#8645f5ff', '#402ca8ff'] as const,
 };
 
@@ -101,7 +101,7 @@ export default function CardDetailsScreen() {
           <TouchableOpacity onPress={handleClose} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>Detail Card</ThemedText>
+          <ThemedText style={styles.headerTitle}>Szczegóły karty</ThemedText>
           <View style={styles.placeholder} />
         </View>
 
@@ -156,7 +156,7 @@ export default function CardDetailsScreen() {
             />
           </View>
           <ThemedText style={styles.actionLabel}>
-            {isCardLocked ? 'Unlock Card' : 'Lock Card'}
+            {isCardLocked ? 'Odblokuj' : 'Zablokuj'}
           </ThemedText>
         </TouchableOpacity>
 
@@ -164,14 +164,14 @@ export default function CardDetailsScreen() {
           <View style={[styles.actionIcon, { backgroundColor: '#4A3A7A' }]}>
             <Ionicons name="document-text" size={24} color="#FFFFFF" />
           </View>
-          <ThemedText style={styles.actionLabel}>History Card</ThemedText>
+          <ThemedText style={styles.actionLabel}>Historia</ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={handleCardSettings}>
           <View style={[styles.actionIcon, { backgroundColor: '#4A3A7A' }]}>
             <Ionicons name="settings" size={24} color="#FFFFFF" />
           </View>
-          <ThemedText style={styles.actionLabel}>Setting Card</ThemedText>
+          <ThemedText style={styles.actionLabel}>Ustawienia</ThemedText>
         </TouchableOpacity>
       </View>
 

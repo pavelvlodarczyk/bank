@@ -30,7 +30,7 @@ interface MyLoan {
   startDate: string;
   maturityDate: string;
   color: string;
-  emoji: string;
+  icon: string;
 }
 
 const myLoans: MyLoan[] = [
@@ -48,7 +48,7 @@ const myLoans: MyLoan[] = [
     startDate: '15.08.2019',
     maturityDate: '15.08.2044',
     color: '#4A3A7A',
-    emoji: '🏠'
+    icon: 'home-outline'
   },
   {
     id: '2', 
@@ -64,7 +64,7 @@ const myLoans: MyLoan[] = [
     startDate: '10.03.2023',
     maturityDate: '10.03.2027',
     color: '#FF2D92',
-    emoji: '💳'
+    icon: 'card-outline'
   },
   {
     id: '3',
@@ -80,7 +80,7 @@ const myLoans: MyLoan[] = [
     startDate: '20.06.2022',
     maturityDate: '20.06.2026',
     color: '#34C759',
-    emoji: '�'
+    icon: 'car-outline'
   }
 ];
 
@@ -172,7 +172,7 @@ export default function LoansScreen() {
       ]}
     >
       <View style={[loanStyles.loanIconContainer, { backgroundColor: loan.color + '15' }]}>
-        <ThemedText style={loanStyles.iconEmoji}>{loan.emoji}</ThemedText>
+        <Ionicons name={loan.icon as any} size={20} color={loan.color} />
       </View>
       <View style={loanStyles.contentContainer}>
         <View style={loanStyles.headerRow}>
@@ -431,9 +431,6 @@ const loanStyles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  iconEmoji: {
-    fontSize: 28,
   },
   headerInfo: {
     flex: 1,
