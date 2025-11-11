@@ -13,6 +13,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { TabHeader } from '@/components/ui/tab-header';
 import { SearchWithAI } from '@/components/ui/search-with-ai';
 import { Fonts } from '@/constants/theme';
+import { TotalBalance } from '@/components/ui/total-balance';
 
 interface MyProduct {
   id: string;
@@ -230,6 +231,13 @@ export default function ProductsScreen() {
           Produkty
         </ThemedText>
       </ThemedView>
+      <TotalBalance
+        amount={34534}
+        onPress={() => {
+          console.log('Total balance pressed');
+          // Tutaj można dodać nawigację do szczegółów salda
+        }}
+      />
       <View style={styles.spacer} />
       <ThemedView style={styles.productsContainer}>
         {myProducts.map(renderProduct)}

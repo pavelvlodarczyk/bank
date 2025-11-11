@@ -9,6 +9,7 @@ import { BlikLogo } from '@/components/ui/blik-logo';
 import { Link, useRouter } from 'expo-router';
 import { TabHeader } from '@/components/ui/tab-header';
 import { SearchWithAI } from '@/components/ui/search-with-ai';
+import { TotalBalance } from '@/components/ui/total-balance';
 
 type Card = { id: string; brand: string; number: string; balance: number; type: string; gradient: readonly [string, string, ...string[]]; cvv: string; expiration: string; fullNumber: string };
 
@@ -265,15 +266,15 @@ export default function HomeScreen() {
       />
 
       {/* Total balance */}
-      <View style={styles.totalRow}>
-        <View>
-          <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>Łączne saldo</Text>
-          <View style={styles.totalAmountRow}>
-            <Text style={[styles.totalAmount, { color: colors.text }]}>{new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(34534)}</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.text} style={styles.totalChevron} />
-          </View>
-        </View>
-      </View>
+      <View style={styles.gapHorizontal}>
+        <TotalBalance
+          amount={34534}
+          onPress={() => {
+            console.log('Total balance pressed');
+            // Tutaj można dodać nawigację do szczegółów salda
+          }}
+        />
+      </View>>
 
       {/* Cards carousel */}
       <ScrollView
@@ -393,7 +394,7 @@ export default function HomeScreen() {
 
       {/* Transfers */}
       <View style={styles.transfersSection}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Płatności</Text>
+        <View style={styles.gapHorizontal}><Text style={[styles.sectionTitle, { color: colors.text }]}>Płatności</Text></View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.transfersList}>
           {recipients.map(r => (
             <TouchableOpacity 
@@ -545,12 +546,9 @@ const styles = StyleSheet.create({
   greetingText: { fontSize: 18, fontWeight: '600' },
   headerRight: { flexDirection: 'row', alignItems: 'center' },
   headerIconBtn: { borderRadius: 16, padding: 8, marginLeft: 10 },
+  gapHorizontal: { paddingHorizontal: 18 },
 
-  totalRow: { paddingHorizontal: 18, marginBottom: 18 },
-  totalLabel: { fontSize: 13 },
-  totalAmountRow: { flexDirection: 'row', alignItems: 'center' },
-  totalAmount: { fontSize: 32, fontWeight: '700' },
-  totalChevron: { marginLeft: 8 },
+
   cardsScrollView: { 
     overflow: 'visible',
     ...(Platform.OS === 'web' && {
@@ -588,10 +586,10 @@ const styles = StyleSheet.create({
   cardBalanceBlock: {},
   cardBalance: { fontSize: 22, fontWeight: '700', color: '#fff' },
   cardType: { fontSize: 13, color: '#F2F2F2', marginTop: 2 },
-  transfersSection: { marginTop: 24, paddingHorizontal: 18 },
+  transfersSection: { marginTop: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
-  transfersList: { flexDirection: 'row', alignItems: 'flex-start' },
-  transferItem: { alignItems: 'center', marginRight: 16, width: 60 },
+  transfersList: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 18 },
+  transferItem: { marginRight: 16, width: 48 },
   transferAvatar: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 6, borderWidth: 1 },
   transferAvatarNew: {},
   transferAvatarBlik: { backgroundColor: '#000000' },
