@@ -391,7 +391,15 @@ export default function HomeScreen() {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Płatności</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.transfersList}>
           {recipients.map(r => (
-            <View key={r.id} style={styles.transferItem}>
+            <TouchableOpacity 
+              key={r.id} 
+              style={styles.transferItem}
+              onPress={() => {
+                if (r.blik) {
+                  router.push('/blik');
+                }
+              }}
+            >
               {r.blik ? (
                 <View style={[styles.transferAvatar, styles.transferAvatarBlik]}><BlikLogo size={28} color="#FFFFFF" /></View>
               ) : r.icon ? (
@@ -402,7 +410,7 @@ export default function HomeScreen() {
                 <RNImage source={{ uri: r.uri }} style={styles.transferAvatarImg} />
               )}
               <Text style={[styles.transferName, { color: colors.text }]}>{r.label}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
       </View>

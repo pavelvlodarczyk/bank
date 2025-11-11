@@ -50,6 +50,15 @@ export default function RootLayout() {
               animation: 'slide_from_right',
             }} 
           />
+          <Stack.Screen 
+            name="blik" 
+            options={{ 
+              presentation: 'modal',
+              title: 'BLIK',
+              headerShown: false,
+              animation: 'slide_from_bottom',
+            }} 
+          />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
