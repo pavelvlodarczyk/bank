@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   },
   selectedCard: {
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: '#4A3A7A',
   },
   cardContent: {
     width: '100%',
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   cardBalanceText: {
     fontSize: 22,
     fontWeight: '600',
-    color: '#007AFF',
+    color: '#4A3A7A',
   },
   cardNumber: {},
   cardNumberText: {

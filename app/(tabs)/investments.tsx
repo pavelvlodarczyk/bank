@@ -104,7 +104,7 @@ const investmentProducts: InvestmentProduct[] = [
     riskLevel: 'low',
     minInvestment: '500 zł',
     features: ['Gwarantowany zwrot', 'Niskie ryzyko', 'Regularne wypłaty odsetek'],
-    color: '#007AFF',
+    color: '#4A3A7A',
     icon: 'shield-checkmark'
   },
   {
@@ -249,9 +249,12 @@ export default function InvestmentsScreen() {
   return (
     <ThemedView style={styles.container}>
       <TabHeader
-        showSearch={true}
+        showContact={true}
         showAvatar={true}
-        onSearchPress={() => console.log('Search pressed')}
+        onContactPress={() => {
+          console.log('Calling bank...');
+          alert('Dzwonimy do banku: +48 800 123 456');
+        }}
         onNotificationPress={() => console.log('Notifications pressed')}
       />
       

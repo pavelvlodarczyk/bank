@@ -35,7 +35,7 @@ const myProducts: MyProduct[] = [
     status: 'active',
     lastActivity: 'Dzisiaj, 14:23',
     icon: 'wallet-outline',
-    color: '#007AFF',
+    color: '#4A3A7A',
     details: 'Główne konto osobiste z kartą debetową'
   },
   {
@@ -143,9 +143,12 @@ export default function ProductsScreen() {
   return (
     <ThemedView style={styles.container}>
       <TabHeader
-        showSearch={true}
+        showContact={true}
         showAvatar={true}
-        onSearchPress={() => console.log('Search pressed')}
+        onContactPress={() => {
+          console.log('Calling bank...');
+          alert('Dzwonimy do banku: +48 800 123 456');
+        }}
         onNotificationPress={() => console.log('Notifications pressed')}
       />
       

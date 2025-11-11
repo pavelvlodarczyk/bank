@@ -38,7 +38,7 @@ const marketplaceData: MarketplaceCategory[] = [
     name: 'Ubezpieczenia',
     description: 'Kompleksowa ochrona dla Ciebie i Twojej rodziny',
     icon: 'shield-checkmark',
-    color: '#007AFF',
+    color: '#4A3A7A',
     items: [
       {
         id: '1',
@@ -49,7 +49,7 @@ const marketplaceData: MarketplaceCategory[] = [
         features: ['Assistance 24/7', 'Samochód zastępczy', 'Ochrona prawna'],
         provider: 'Partner Insurance',
         rating: 4.8,
-        color: '#007AFF'
+        color: '#4A3A7A'
       },
       {
         id: '2',
@@ -248,9 +248,12 @@ export default function ExploreScreen() {
   return (
     <ThemedView style={styles.container}>
       <TabHeader
-        showSearch={true}
+        showContact={true}
         showAvatar={true}
-        onSearchPress={() => console.log('Search pressed')}
+        onContactPress={() => {
+          console.log('Calling bank...');
+          alert('Dzwonimy do banku: +48 800 123 456');
+        }}
         onNotificationPress={() => console.log('Notifications pressed')}
       />
       

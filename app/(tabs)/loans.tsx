@@ -43,7 +43,7 @@ const myLoans: MyLoan[] = [
     status: 'active',
     startDate: '15.08.2019',
     maturityDate: '15.08.2044',
-    color: '#007AFF',
+    color: '#4A3A7A',
     emoji: '🏠'
   },
   {
@@ -131,9 +131,12 @@ export default function LoansScreen() {
   return (
     <ThemedView style={loanStyles.container}>
       <TabHeader
-        showSearch={true}
+        showContact={true}
         showAvatar={true}
-        onSearchPress={() => console.log('Search pressed')}
+        onContactPress={() => {
+          console.log('Calling bank...');
+          alert('Dzwonimy do banku: +48 800 123 456');
+        }}
         onNotificationPress={() => console.log('Notifications pressed')}
       />
       
@@ -247,7 +250,7 @@ const loanStyles = StyleSheet.create({
   calculatorAmount: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#007AFF',
+    color: '#4A3A7A',
   },
   loansContainer: {
     gap: 16,

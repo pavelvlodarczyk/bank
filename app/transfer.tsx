@@ -15,12 +15,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 export default function TransferScreen() {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const params = useLocalSearchParams();
   
   // Form state
   const [recipientName, setRecipientName] = useState<string>('');
@@ -52,6 +53,41 @@ export default function TransferScreen() {
       fadeAnim.setValue(1);
     }
   }, []);
+
+  // Auto-fill form from URL parameters
+  useEffect(() => {
+    if (params.name && typeof params.name === 'string') {
+      setRecipientName(decodeURIComponent(params.name));
+    }
+    if (params.account && typeof params.account === 'string') {
+      setAccountNumber(decodeURIComponent(params.account));
+    }
+    if (params.title && typeof params.title === 'string') {
+      setTitle(decodeURIComponent(params.title));
+    }
+  }, [params]);
+
+  const handleClose = () => {
+    if (Platform.OS === 'web') {
+      // Exit animation
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 100,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        router.back();
+      });
+    } else {
+      router.back();
+    }
+  };
 
   const formatAccountNumber = (text: string) => {
     // Remove all non-digits
@@ -136,7 +172,7 @@ export default function TransferScreen() {
         [
           {
             text: 'OK',
-            onPress: () => router.back()
+            onPress: handleClose
           }
         ]
       );
@@ -174,7 +210,7 @@ export default function TransferScreen() {
         ]}>
           <TouchableOpacity 
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={handleClose}
           >
             <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
           </TouchableOpacity>
@@ -289,13 +325,13 @@ export default function TransferScreen() {
             {/* Info */}
             <ThemedView style={styles.infoSection}>
               <View style={styles.infoItem}>
-                <Ionicons name="time-outline" size={20} color="#007AFF" />
+                <Ionicons name="time-outline" size={20} color="#4A3A7A" />
                 <ThemedText style={styles.infoText}>
                   Przelew zostanie zrealizowany w ciągu 24h
                 </ThemedText>
               </View>
               <View style={styles.infoItem}>
-                <Ionicons name="shield-checkmark-outline" size={20} color="#007AFF" />
+                <Ionicons name="shield-checkmark-outline" size={20} color="#4A3A7A" />
                 <ThemedText style={styles.infoText}>
                   Wszystkie dane są szyfrowane i bezpieczne
                 </ThemedText>
@@ -383,7 +419,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   transferButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#4A3A7A',
     borderRadius: 16,
     padding: 18,
     flexDirection: 'row',

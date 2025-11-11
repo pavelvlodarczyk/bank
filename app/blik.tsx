@@ -237,19 +237,19 @@ export default function BlikScreen() {
         {/* Info */}
         <ThemedView style={styles.infoSection}>
           <View style={styles.infoItem}>
-            <Ionicons name="time-outline" size={20} color="#007AFF" />
+            <Ionicons name="time-outline" size={20} color="#4A3A7A" />
             <ThemedText style={styles.infoText}>
               Kod ważny przez 60 sekund
             </ThemedText>
           </View>
           <View style={styles.infoItem}>
-            <Ionicons name="shield-checkmark-outline" size={20} color="#007AFF" />
+            <Ionicons name="shield-checkmark-outline" size={20} color="#4A3A7A" />
             <ThemedText style={styles.infoText}>
               Bezpieczne płatności i wypłaty
             </ThemedText>
           </View>
           <View style={styles.infoItem}>
-            <Ionicons name="card-outline" size={20} color="#007AFF" />
+            <Ionicons name="card-outline" size={20} color="#4A3A7A" />
             <ThemedText style={styles.infoText}>
               Bez konieczności podawania numeru karty
             </ThemedText>
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#007AFF',
+    backgroundColor: '#4A3A7A',
     borderRadius: 2,
   },
   timerText: {

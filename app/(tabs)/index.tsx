@@ -253,9 +253,13 @@ export default function HomeScreen() {
       
       {/* Header (Safe Area aware) */}
       <TabHeader
-        showSearch={true}
+        showContact={true}
         showAvatar={true}
-        onSearchPress={() => console.log('Search pressed')}
+        onContactPress={() => {
+          console.log('Calling bank...');
+          // In real app this would open phone dialer
+          alert('Dzwonimy do banku: +48 800 123 456');
+        }}
         onNotificationPress={() => console.log('Notifications pressed')}
       />
 
@@ -394,11 +398,29 @@ export default function HomeScreen() {
             <TouchableOpacity 
               key={r.id} 
               style={styles.transferItem}
+              activeOpacity={0.7}
               onPress={() => {
                 if (r.blik) {
                   router.push('/blik');
                 } else if (r.id === 'new') {
                   router.push('/transfer');
+                } else {
+                  // Open transfer modal with pre-filled recipient data
+                  const recipientData = {
+                    name: r.label,
+                    // Mock account numbers for recipients
+                    account: r.id === 'ry' ? 'PL 1234 5678 9012 3456 7890 1111' :
+                             r.id === 'dad' ? 'PL 2345 6789 0123 4567 8901 2222' :
+                             r.id === 'ksu' ? 'PL 3456 7890 1234 5678 9012 3333' :
+                             r.id === 'mum' ? 'PL 4567 8901 2345 6789 0123 4444' :
+                             r.id === 'die' ? 'PL 5678 9012 3456 7890 1234 5555' : '',
+                    // Default transfer titles
+                    title: r.id === 'dad' || r.id === 'mum' ? 'Kieszonkowe' :
+                           r.id === 'ry' ? 'Przelew dla Rina Y.' :
+                           r.id === 'ksu' ? 'Zwrot za zakupy' :
+                           r.id === 'die' ? 'Przelew dla Diana E.' : 'Przelew'
+                  };
+                  router.push(`/transfer?name=${encodeURIComponent(recipientData.name)}&account=${encodeURIComponent(recipientData.account)}&title=${encodeURIComponent(recipientData.title)}`);
                 }
               }}
             >

@@ -9,10 +9,10 @@ interface TabHeaderProps {
   title?: string;
   showAvatar?: boolean;
   showNotifications?: boolean;
-  showSearch?: boolean;
+  showContact?: boolean;
   onAvatarPress?: () => void;
   onNotificationPress?: () => void;
-  onSearchPress?: () => void;
+  onContactPress?: () => void;
 }
 
 const getColors = (colorScheme: 'light' | 'dark' | null | undefined) => ({
@@ -25,10 +25,10 @@ export function TabHeader({
   title = '', 
   showAvatar = false, 
   showNotifications = true, 
-  showSearch = false,
+  showContact = false,
   onAvatarPress,
   onNotificationPress,
-  onSearchPress 
+  onContactPress 
 }: TabHeaderProps) {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
@@ -50,12 +50,12 @@ export function TabHeader({
       </View>
       
       <View style={styles.headerRight}>
-        {showSearch && (
+        {showContact && (
           <TouchableOpacity 
             style={[styles.headerIconBtn, { backgroundColor: colors.iconBackground }]}
-            onPress={onSearchPress}
+            onPress={onContactPress}
           >
-            <Ionicons name="search-outline" size={22} color={colors.text} />
+            <Ionicons name="call-outline" size={22} color={colors.text} />
           </TouchableOpacity>
         )}
         {showNotifications && (
