@@ -257,10 +257,11 @@ export default function HomeScreen() {
       <TabHeader
         showContact={true}
         showAvatar={true}
+        onAvatarPress={() => router.push('/profile')}
         onContactPress={() => {
           console.log('Calling bank...');
           // In real app this would open phone dialer
-          alert('Dzwonimy do banku: +48 800 123 456');
+          alert('Dzwoniemy do banku: +48 800 123 456');
         }}
         onNotificationPress={() => console.log('Notifications pressed')}
       />
@@ -270,7 +271,7 @@ export default function HomeScreen() {
         <TotalBalance
           amount={34534}
           onPress={() => {
-            console.log('Total balance pressed');
+            router.push('/products');
             // Tutaj można dodać nawigację do szczegółów salda
           }}
         />

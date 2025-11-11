@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Image } from 'expo-image';
 import { Platform, StyleSheet, View, TouchableOpacity, ScrollView, Animated, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -138,6 +139,7 @@ const investmentProducts: InvestmentProduct[] = [
 
 export default function InvestmentsScreen() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   
   // Floating search button state
@@ -315,6 +317,7 @@ export default function InvestmentsScreen() {
       <TabHeader
         showContact={true}
         showAvatar={true}
+        onAvatarPress={() => router.push('/profile')}
         onContactPress={() => {
           console.log('Calling bank...');
           alert('Dzwonimy do banku: +48 800 123 456');
