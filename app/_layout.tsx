@@ -59,6 +59,15 @@ export default function RootLayout() {
               animation: 'slide_from_bottom',
             }} 
           />
+          <Stack.Screen 
+            name="transfer" 
+            options={{ 
+              presentation: 'modal',
+              title: 'Przelew krajowy',
+              headerShown: false,
+              animation: 'slide_from_bottom',
+            }} 
+          />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>

@@ -397,6 +397,8 @@ export default function HomeScreen() {
               onPress={() => {
                 if (r.blik) {
                   router.push('/blik');
+                } else if (r.id === 'new') {
+                  router.push('/transfer');
                 }
               }}
             >

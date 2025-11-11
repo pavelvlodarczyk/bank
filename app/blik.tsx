@@ -149,6 +149,7 @@ export default function BlikScreen() {
         styles.header,
         {
           paddingTop: insets.top + 16,
+          borderBottomColor: isDark ? '#3A3A3C' : '#E5E5E7'
         }
       ]}>
         <TouchableOpacity onPress={handleClose} style={styles.backButton}>
@@ -266,17 +267,24 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingBottom: 16,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   backButton: {
-    padding: 8,
+    padding: 10,
+    borderRadius: 22,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(142, 142, 147, 0.12)',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    flex: 1,
-    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: '700',
+    letterSpacing: -0.4,
   },
   placeholder: {
     width: 40,
