@@ -56,7 +56,7 @@ export default function CardDetailsScreen() {
       // Exit animation - slide down
       Animated.timing(slideAnim, {
         toValue: screenHeight,
-        duration: 30000,
+        duration: 300,
         useNativeDriver: true,
       }).start(() => {
         router.back();
@@ -70,7 +70,7 @@ export default function CardDetailsScreen() {
   useEffect(() => {
     Animated.timing(slideAnim, {
       toValue: 0,
-      duration: 30000,
+      duration: 300,
       useNativeDriver: true,
     }).start();
   }, []);

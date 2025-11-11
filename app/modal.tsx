@@ -133,8 +133,7 @@ export default function ModalScreen() {
         <TouchableOpacity 
           style={[
             styles.searchItem,
-            { 
-              borderBottomColor: isDark ? '#2C2C2E' : '#E5E5E7',
+            {
               backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF'
             }
           ]}

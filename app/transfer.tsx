@@ -26,9 +26,11 @@ export default function TransferScreen() {
   
   // Form state
   const [recipientName, setRecipientName] = useState<string>('');
+  const [recipientAddress, setRecipientAddress] = useState<string>('');
   const [accountNumber, setAccountNumber] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [title, setTitle] = useState<string>('');
+  const [transferDate, setTransferDate] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
   // Animation values - jednolita animacja wysuwania z dołu (100% wysokości ekranu)
@@ -43,6 +45,11 @@ export default function TransferScreen() {
       duration: 300,
       useNativeDriver: true,
     }).start();
+    
+    // Initialize transfer date to today
+    const today = new Date();
+    const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+    setTransferDate(formattedDate);
   }, []);
 
   // Auto-fill form from URL parameters
@@ -117,9 +124,14 @@ export default function TransferScreen() {
     setAmount(formatted);
   };
 
-  const validateForm = () => {
+    const validateForm = (): boolean => {
     if (!recipientName.trim()) {
       Alert.alert('Błąd', 'Podaj nazwę odbiorcy');
+      return false;
+    }
+    
+    if (!recipientAddress.trim()) {
+      Alert.alert('Błąd', 'Podaj adres odbiorcy');
       return false;
     }
     
@@ -138,6 +150,11 @@ export default function TransferScreen() {
       return false;
     }
     
+    if (!transferDate.trim()) {
+      Alert.alert('Błąd', 'Podaj datę przelewu');
+      return false;
+    }
+    
     return true;
   };
 
@@ -152,7 +169,7 @@ export default function TransferScreen() {
       
       Alert.alert(
         'Przelew wysłany',
-        `Przelew na kwotę ${amount} PLN dla ${recipientName} został wysłany pomyślnie.`,
+        `Przelew na kwotę ${amount} PLN dla ${recipientName} zaplanowany na ${transferDate} został wysłany pomyślnie.`,
         [
           {
             text: 'OK',
@@ -192,7 +209,6 @@ export default function TransferScreen() {
           styles.header, 
           { 
             paddingTop: 16,
-            borderBottomColor: isDark ? '#3A3A3C' : '#E5E5E7'
           }
         ]}>
           <TouchableOpacity 
@@ -209,9 +225,28 @@ export default function TransferScreen() {
           <View style={styles.content}>
             {/* Form */}
             <ThemedView style={styles.formSection}>
+              {/* From Account */}
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.label}>Z rachunku</ThemedText>
+                <TouchableOpacity style={[
+                  styles.input,
+                  styles.dropdownButton,
+                  { 
+                    backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+                    borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                  }
+                ]}>
+                  <View style={styles.dropdownContent}>
+                    <ThemedText style={styles.dropdownText}>*6034</ThemedText>
+                    <ThemedText style={styles.dropdownSubtext}>75 399,72 PLN</ThemedText>
+                  </View>
+                  <Ionicons name="chevron-down" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
+                </TouchableOpacity>
+              </View>
+
               {/* Recipient Name */}
               <View style={styles.inputGroup}>
-                <ThemedText style={styles.label}>Nazwa odbiorcy</ThemedText>
+                <ThemedText style={styles.label}>Do odbiorcy</ThemedText>
                 <TextInput
                   style={[
                     styles.input,
@@ -223,14 +258,36 @@ export default function TransferScreen() {
                   ]}
                   value={recipientName}
                   onChangeText={setRecipientName}
-                  placeholder="Jan Kowalski"
+                  placeholder="Wpisz nazwę odbiorcy"
+                  placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
+                />
+                <TouchableOpacity style={styles.contactButton}>
+                  <Ionicons name="person-add" size={20} color="#4A3A7A" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Recipient Address */}
+              <View style={styles.inputGroup}>
+                <ThemedText style={[styles.label]}>Adres odbiorcy</ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    { 
+                      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+                      color: isDark ? '#FFFFFF' : '#000000',
+                      borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                    }
+                  ]}
+                  value={recipientAddress}
+                  onChangeText={setRecipientAddress}
+                  placeholder="Wpisz adres odbiorcy"
                   placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
                 />
               </View>
 
               {/* Account Number */}
               <View style={styles.inputGroup}>
-                <ThemedText style={styles.label}>Numer rachunku</ThemedText>
+                <ThemedText style={styles.label}>Na rachunek</ThemedText>
                 <TextInput
                   style={[
                     styles.input,
@@ -242,7 +299,7 @@ export default function TransferScreen() {
                   ]}
                   value={accountNumber}
                   onChangeText={handleAccountNumberChange}
-                  placeholder="PL 1234 5678 9012 3456 7890 1234"
+                  placeholder="Wpisz numer rachunku odbiorcy"
                   placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
                   keyboardType="numeric"
                   maxLength={32} // 26 digits + 6 spaces
@@ -272,7 +329,7 @@ export default function TransferScreen() {
 
               {/* Title */}
               <View style={styles.inputGroup}>
-                <ThemedText style={styles.label}>Tytuł przelewu</ThemedText>
+                <ThemedText style={styles.label}>Tytuł</ThemedText>
                 <TextInput
                   style={[
                     styles.input,
@@ -284,9 +341,34 @@ export default function TransferScreen() {
                   ]}
                   value={title}
                   onChangeText={setTitle}
-                  placeholder="Za usługi"
+                  placeholder="Przelew środków"
                   placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
                 />
+                <TouchableOpacity style={styles.closeButton}>
+                  <Ionicons name="close" size={16} color="#8E8E93" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Transfer Date */}
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.label}>Data przelewu</ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    { 
+                      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+                      color: isDark ? '#FFFFFF' : '#000000',
+                      borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                    }
+                  ]}
+                  value={transferDate}
+                  onChangeText={setTransferDate}
+                  placeholder="11-11-2025"
+                  placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
+                />
+                <TouchableOpacity style={styles.calendarButton}>
+                  <Ionicons name="calendar" size={20} color="#8E8E93" />
+                </TouchableOpacity>
               </View>
             </ThemedView>
 
@@ -308,22 +390,6 @@ export default function TransferScreen() {
                 </>
               )}
             </TouchableOpacity>
-
-            {/* Info */}
-            <ThemedView style={styles.infoSection}>
-              <View style={styles.infoItem}>
-                <Ionicons name="time-outline" size={20} color="#4A3A7A" />
-                <ThemedText style={styles.infoText}>
-                  Przelew zostanie zrealizowany w ciągu 24h
-                </ThemedText>
-              </View>
-              <View style={styles.infoItem}>
-                <Ionicons name="shield-checkmark-outline" size={20} color="#4A3A7A" />
-                <ThemedText style={styles.infoText}>
-                  Wszystkie dane są szyfrowane i bezpieczne
-                </ThemedText>
-              </View>
-            </ThemedView>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -455,5 +521,48 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     flex: 1,
     opacity: 0.8,
+  },
+  labelRequired: {
+    color: '#FF3B30',
+  },
+  contactButton: {
+    position: 'absolute',
+    right: 12,
+    top: '50%',
+    marginTop: -10,
+    padding: 10,
+  },
+  closeButton: {
+    position: 'absolute',
+    right: 12,
+    top: '50%',
+    marginTop: -8,
+    padding: 8,
+  },
+  calendarButton: {
+    position: 'absolute',
+    right: 12,
+    top: '50%',
+    marginTop: -10,
+    padding: 10,
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  dropdownContent: {
+    flex: 1,
+  },
+  dropdownText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  dropdownSubtext: {
+    fontSize: 14,
+    opacity: 0.7,
+    marginTop: 2,
   },
 });

@@ -315,7 +315,6 @@ export default function TransactionDetailsScreen() {
             styles.detailsSection,
             { 
               backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-              borderColor: isDark ? '#2C2C2E' : '#E5E5E7'
             }
           ]}>
             <ThemedText style={styles.sectionTitle}>Szczegóły</ThemedText>

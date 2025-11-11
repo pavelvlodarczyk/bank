@@ -133,7 +133,6 @@ export default function BlikScreen() {
           styles.header,
           {
             paddingTop: 16,
-            borderBottomColor: isDark ? '#3A3A3C' : '#E5E5E7'
           }
         ]}>
           <TouchableOpacity onPress={handleClose} style={styles.backButton}>
