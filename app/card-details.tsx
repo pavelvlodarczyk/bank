@@ -56,7 +56,7 @@ export default function CardDetailsScreen() {
       // Exit animation - slide down
       Animated.timing(slideAnim, {
         toValue: screenHeight,
-        duration: 300,
+        duration: 30000,
         useNativeDriver: true,
       }).start(() => {
         router.back();
@@ -70,7 +70,7 @@ export default function CardDetailsScreen() {
   useEffect(() => {
     Animated.timing(slideAnim, {
       toValue: 0,
-      duration: 300,
+      duration: 30000,
       useNativeDriver: true,
     }).start();
   }, []);
@@ -83,6 +83,7 @@ export default function CardDetailsScreen() {
         styles.container,
         {
           transform: [{ translateY: slideAnim }],
+          overflow: 'visible',
         }
       ]}
     >
@@ -222,6 +223,7 @@ export default function CardDetailsScreen() {
       left: 0,
       right: 0,
       bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
     }),
   },
   modalContent: {

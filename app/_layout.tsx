@@ -35,7 +35,7 @@ export default function RootLayout() {
           <Stack.Screen 
             name="transaction-details" 
             options={{ 
-              presentation: 'modal',
+              presentation: Platform.OS === 'web' ? 'transparentModal' : 'modal',
               title: 'Szczegóły transakcji',
               headerShown: false,
               animation: 'slide_from_right',
@@ -44,7 +44,7 @@ export default function RootLayout() {
           <Stack.Screen 
             name="card-details" 
             options={{ 
-              presentation: 'modal',
+              presentation: Platform.OS === 'web' ? 'transparentModal' : 'modal',
               title: 'Detail Card',
               headerShown: false,
               animation: 'slide_from_right',
@@ -53,7 +53,7 @@ export default function RootLayout() {
           <Stack.Screen 
             name="blik" 
             options={{ 
-              presentation: 'modal',
+              presentation: Platform.OS === 'web' ? 'transparentModal' : 'modal',
               title: 'BLIK',
               headerShown: false,
               animation: 'slide_from_bottom',
@@ -62,7 +62,7 @@ export default function RootLayout() {
           <Stack.Screen 
             name="transfer" 
             options={{ 
-              presentation: 'modal',
+              presentation: Platform.OS === 'web' ? 'transparentModal' : 'modal',
               title: 'Przelew krajowy',
               headerShown: false,
               animation: 'slide_from_bottom',
