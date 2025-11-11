@@ -296,10 +296,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    paddingHorizontal: 18,
     paddingBottom: 32,
   },
   heroSection: {
-    paddingHorizontal: 18,
     paddingVertical: 24,
     alignItems: 'center',
   },
