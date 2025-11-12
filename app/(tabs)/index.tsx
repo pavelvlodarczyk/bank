@@ -13,6 +13,12 @@ import { TotalBalance } from '@/components/ui/total-balance';
 
 type Card = { id: string; brand: string; number: string; balance: number; type: string; gradient: readonly [string, string, ...string[]]; cvv: string; expiration: string; fullNumber: string };
 
+type Recipient = 
+  | { id: string; label: string; blik: true }
+  | { id: string; label: string; icon: 'add' }
+  | { id: string; label: string; text: string }
+  | { id: string; label: string; image: any };
+
 const getColors = (colorScheme: 'light' | 'dark' | null | undefined) => ({
   background: colorScheme === 'dark' ? '#121212' : '#F8F8F8',
   cardBackground: colorScheme === 'dark' ? '#1E1E1E' : '#FFFFFF',
@@ -38,14 +44,14 @@ const transactions = [
   { id: '3', type: 'transfer', merchant: 'Jan Kowalski', amount: 500.00, date: '7 lis', icon: 'arrow-down-outline', category: 'Przelew' },
 ];
 
-const recipients = [
+const recipients: Recipient[] = [
   { id: 'blik', label: 'BLIK', blik: true },
   { id: 'new', label: 'Przelew', icon: 'add' as const },
   { id: 'ry', label: 'Rina Y.', text: 'RY' },
   { id: 'dad', label: 'Tata', text: 'Dad' },
-  { id: 'ksu', label: 'Kasia', uri: 'https://randomuser.me/api/portraits/women/65.jpg' },
-  { id: 'mum', label: 'Mama', uri: 'https://randomuser.me/api/portraits/women/44.jpg' },
-  { id: 'die', label: 'Diana', uri: 'https://randomuser.me/api/portraits/women/67.jpg' },
+  { id: 'ksu', label: 'Kasia', image: require('@/assets/images/avatars/kasia.jpg') },
+  { id: 'mum', label: 'Mama', image: require('@/assets/images/avatars/mama.jpg') },
+  { id: 'die', label: 'Diana', image: require('@/assets/images/avatars/diana.jpg') },
 ];
 
 export default function HomeScreen() {
@@ -255,6 +261,7 @@ export default function HomeScreen() {
       
       {/* Header (Safe Area aware) */}
       <TabHeader
+        title=""
         showContact={true}
         showAvatar={true}
         onAvatarPress={() => router.push('/profile')}
@@ -403,7 +410,7 @@ export default function HomeScreen() {
               style={styles.transferItem}
               activeOpacity={0.7}
               onPress={() => {
-                if (r.blik) {
+                if ('blik' in r) {
                   router.push('/blik');
                 } else if (r.id === 'new') {
                   router.push('/transfer');
@@ -427,15 +434,15 @@ export default function HomeScreen() {
                 }
               }}
             >
-              {r.blik ? (
+              {'blik' in r ? (
                 <View style={[styles.transferAvatar, styles.transferAvatarBlik]}><BlikLogo size={28} color="#FFFFFF" /></View>
-              ) : r.icon ? (
+              ) : 'icon' in r ? (
                 <View style={[styles.transferAvatar, styles.transferAvatarNew, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}><Ionicons name={r.icon} size={22} color={colors.accent} /></View>
-              ) : r.text ? (
+              ) : 'text' in r ? (
                 <View style={[styles.transferAvatar, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}><Text style={[styles.transferAvatarText, { color: colors.text }]}>{r.text}</Text></View>
-              ) : (
-                <RNImage source={{ uri: r.uri }} style={styles.transferAvatarImg} />
-              )}
+              ) : 'image' in r ? (
+                <RNImage source={r.image} style={styles.transferAvatarImg} />
+              ) : null}
               <Text style={[styles.transferName, { color: colors.text }]}>{r.label}</Text>
             </TouchableOpacity>
           ))}
@@ -567,12 +574,12 @@ const styles = StyleSheet.create({
       marginBottom: -20,
     })
   },
-  cardsRow: { paddingLeft: 18, paddingRight: 10, overflow: 'visible' },
-  addCard: { width: 60, height: 140, borderRadius: 12, marginRight: 16, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
+  cardsRow: { paddingLeft: 20, paddingRight: 20, overflow: 'visible' },
+  addCard: { width: 60, height: 140, borderRadius: 12, marginRight: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
   cardWrapper: { 
     width: 240, 
     height: 140, 
-    marginRight: 16, 
+    marginRight: 20, 
     overflow: 'visible',
     ...(Platform.OS === 'web' && {
       // Delikatny obszar ochronny tylko dla web

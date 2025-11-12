@@ -10,8 +10,15 @@ module.exports = {
     scheme: "myapp",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
+    assetBundlePatterns: [
+      "assets/**/*"
+    ],
     ios: {
-      supportsTablet: true
+      supportsTablet: true,
+      bundleIdentifier: "com.usecode.pawel.bankingdashboard",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false
+      }
     },
     android: {
       adaptiveIcon: {
@@ -75,6 +82,11 @@ module.exports = {
     experiments: {
       typedRoutes: true,
       reactCompiler: true
+    },
+    extra: {
+      eas: {
+        projectId: "2f9da32a-08e2-4c8b-aefc-3e581667d582"
+      }
     }
   }
 };

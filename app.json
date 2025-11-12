@@ -1,7 +1,12 @@
 {
   "expo": {
-    "name": "my-app",
-    "slug": "my-app",
+    "extra": {
+      "eas": {
+        "projectId": "2f9da32a-08e2-4c8b-aefc-3e581667d582"
+      }
+    },
+    "name": "bank-app",
+    "slug": "bank-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

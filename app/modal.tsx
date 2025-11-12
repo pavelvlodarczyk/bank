@@ -112,16 +112,19 @@ export default function ModalScreen() {
     );
   };  const isDark = colorScheme === 'dark';
 
-  return (
-    <Animated.View 
-      style={[
+  const ContainerComponent = Platform.OS === 'web' ? Animated.View : ThemedView;
+  const containerStyle = Platform.OS === 'web' 
+    ? [
         styles.container,
         {
           transform: [{ translateY: slideAnim }],
-          overflow: 'visible',
+          overflow: 'visible' as const,
         }
-      ]}
-    >
+      ]
+    : styles.container;
+
+  return (
+    <ContainerComponent style={containerStyle}>
       <View style={[
         styles.modalContent, 
         { backgroundColor: isDark ? '#000000' : '#F5F5F5' }
@@ -235,7 +238,7 @@ export default function ModalScreen() {
           )}
         </View>
       </View>
-    </Animated.View>
+    </ContainerComponent>
   );
 }
 

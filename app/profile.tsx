@@ -1,15 +1,16 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView, Image as RNImage, Animated, Easing, Dimensions, Platform } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ScrollView, Image as RNImage, Animated, Dimensions, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
 import { useRouter } from 'expo-router';
 
 const { height: screenHeight } = Dimensions.get('window');
 
 const getColors = (colorScheme: 'light' | 'dark' | null | undefined) => ({
-  background: colorScheme === 'dark' ? '#000000' : '#f5f5f5',
+  background: colorScheme === 'dark' ? '#000000' : '#F5F5F5',
   cardBackground: colorScheme === 'dark' ? '#1E1E1E' : '#FFFFFF',
   text: colorScheme === 'dark' ? '#FFFFFF' : '#222222',
   textSecondary: colorScheme === 'dark' ? '#B0B0B0' : '#4C4C4C',
@@ -34,25 +35,30 @@ export default function ProfileModal() {
   const colors = getColors(colorScheme);
   const router = useRouter();
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+  const isDark = colorScheme === 'dark';
 
   useEffect(() => {
+    // Entry animation - jednolita animacja wysuwania z dołu
     Animated.timing(slideAnim, {
       toValue: 0,
       duration: 300,
-      easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start();
   }, []);
 
   const handleClose = () => {
-    Animated.timing(slideAnim, {
-      toValue: screenHeight,
-      duration: 250,
-      easing: Easing.in(Easing.cubic),
-      useNativeDriver: true,
-    }).start(() => {
+    if (Platform.OS === 'web') {
+      // Exit animation - slide down
+      Animated.timing(slideAnim, {
+        toValue: screenHeight,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
+        router.back();
+      });
+    } else {
       router.back();
-    });
+    }
   };
 
   const handleOptionPress = (screen: string) => {
@@ -60,32 +66,44 @@ export default function ProfileModal() {
     console.log(`Navigate to: ${screen}`);
   };
 
+  const ContainerComponent = Platform.OS === 'web' ? Animated.View : ThemedView;
+  const containerStyle = Platform.OS === 'web' 
+    ? [
+        styles.container,
+        {
+          transform: [{ translateY: slideAnim }],
+          overflow: 'visible' as const,
+        }
+      ]
+    : styles.container;
+
   return (
-    <View style={[styles.container, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
-      <Animated.View
-        style={[
-          styles.modal,
-          {
-            backgroundColor: colors.background,
-            transform: [{ translateY: slideAnim }],
-            paddingTop: Platform.OS === 'ios' ? insets.top + 20 : 20,
-          },
-        ]}
-      >
+    <ContainerComponent style={containerStyle}>
+      <View style={[
+        styles.modalContent, 
+        { backgroundColor: colors.background }
+      ]}>
         {/* Header */}
-        <View style={styles.header}>
-          <ThemedText style={styles.title}>Profil</ThemedText>
-          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={colors.text} />
+        <View style={[
+          styles.header,
+          {
+            borderBottomColor: colors.border
+          }
+        ]}>
+          <TouchableOpacity onPress={handleClose} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
+          <ThemedText style={styles.title}>Profil</ThemedText>
+          <View style={styles.placeholder} />
         </View>
 
+        {/* Content */}
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* User Info Section */}
           <View style={[styles.userInfoSection, { backgroundColor: colors.cardBackground }]}>
             <View style={styles.userInfoHeader}>
               <RNImage 
-                source={{ uri: 'https://randomuser.me/api/portraits/women/10.jpg' }} 
+                source={require('@/assets/images/avatars/profile.jpg')} 
                 style={styles.profileAvatar} 
               />
               <View style={styles.userDetails}>
@@ -166,38 +184,53 @@ export default function ProfileModal() {
             <ThemedText style={styles.logoutText}>Wyloguj się</ThemedText>
           </TouchableOpacity>
         </ScrollView>
-      </Animated.View>
-    </View>
+      </View>
+    </ContainerComponent>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    backgroundColor: 'transparent',
   },
-  modal: {
+  modalContent: {
     flex: 1,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '95%',
+    ...(Platform.OS === 'web' && {
+      marginTop: '10%',
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    }),
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  backButton: {
+    padding: 4,
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'center',
   },
-  closeButton: {
-    padding: 4,
+  placeholder: {
+    width: 40,
+    height: 40,
   },
   content: {
     flex: 1,
+    paddingTop: 20,
     paddingHorizontal: 20,
   },
   userInfoSection: {

@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemedText } from '@/components/themed-text';
 
+const profileAvatar = require('@/assets/images/avatars/profile.jpg');
+
 interface TabHeaderProps {
   title?: string;
   showAvatar?: boolean;
@@ -28,11 +30,13 @@ export function TabHeader({
   showContact = false,
   onAvatarPress,
   onNotificationPress,
-  onContactPress 
+  onContactPress,
 }: TabHeaderProps) {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const colors = getColors(colorScheme);
+  
+
 
   return (
     <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
@@ -40,13 +44,13 @@ export function TabHeader({
         {showAvatar && (
           <TouchableOpacity onPress={onAvatarPress} style={styles.avatarContainer}>
             <RNImage 
-              source={{ uri: 'https://randomuser.me/api/portraits/women/10.jpg' }} 
-              style={styles.avatar} 
+              style={styles.avatar}
+              source={profileAvatar} 
             />
             <ThemedText style={styles.greetingText}>Cześć, Iwona!</ThemedText>
           </TouchableOpacity>
         )}
-        <ThemedText style={styles.headerTitle}>{title}</ThemedText>
+        {title && <ThemedText style={styles.headerTitle}>{title}</ThemedText>}
       </View>
       
       <View style={styles.headerRight}>
