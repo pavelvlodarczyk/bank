@@ -293,7 +293,7 @@ export default function TransferScreen() {
                   style={[
                     styles.dropdownButton,
                     { 
-                      borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                      borderColor: isDark ? '#3A3A3C' : '#CCCCCC'
                     }
                   ]}
                   onPress={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -329,7 +329,7 @@ export default function TransferScreen() {
                     styles.input,
                     { 
                       color: isDark ? '#FFFFFF' : '#000000',
-                      borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                      borderColor: isDark ? '#3A3A3C' : '#CCCCCC'
                     }
                   ]}
                   value={recipientName}
@@ -347,7 +347,7 @@ export default function TransferScreen() {
                     styles.input,
                     {
                       color: isDark ? '#FFFFFF' : '#000000',
-                      borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                      borderColor: isDark ? '#3A3A3C' : '#CCCCCC'
                     }
                   ]}
                   value={recipientAddress}
@@ -365,7 +365,7 @@ export default function TransferScreen() {
                     styles.input,
                     {
                       color: isDark ? '#FFFFFF' : '#000000',
-                      borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                      borderColor: isDark ? '#3A3A3C' : '#CCCCCC'
                     }
                   ]}
                   value={accountNumber}
@@ -386,7 +386,7 @@ export default function TransferScreen() {
                     styles.amountInput,
                     {
                       color: isDark ? '#FFFFFF' : '#000000',
-                      borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                      borderColor: isDark ? '#3A3A3C' : '#CCCCCC'
                     }
                   ]}
                   value={amount}
@@ -405,7 +405,7 @@ export default function TransferScreen() {
                     styles.input,
                     {
                       color: isDark ? '#FFFFFF' : '#000000',
-                      borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                      borderColor: isDark ? '#3A3A3C' : '#CCCCCC'
                     }
                   ]}
                   value={title}
@@ -423,7 +423,7 @@ export default function TransferScreen() {
                     styles.input,
                     styles.dateButton,
                     { 
-                      borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                      borderColor: isDark ? '#3A3A3C' : '#CCCCCC'
                     }
                   ]}
                   onPress={() => setShowDatePicker(true)}
@@ -478,7 +478,7 @@ export default function TransferScreen() {
           styles.dropdownOverlay,
           { 
             backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-            borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+            borderColor: isDark ? '#3A3A3C' : '#CCCCCC'
           }
         ]}>
           <ScrollView 
