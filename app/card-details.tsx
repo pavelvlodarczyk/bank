@@ -232,7 +232,7 @@ export default function CardDetailsScreen() {
   modalContent: {
     flex: 1,
     ...(Platform.OS === 'web' && {
-      marginTop: '10%',
+      marginTop: '40px',
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
     }),
