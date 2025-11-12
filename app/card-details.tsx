@@ -243,7 +243,6 @@ export default function CardDetailsScreen() {
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   backButton: {
     padding: 10,

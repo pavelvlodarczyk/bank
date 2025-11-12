@@ -274,7 +274,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   backButton: {
     padding: 10,
@@ -302,10 +301,10 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
   },
   blikLogoContainer: {
-    width: 120,
+    width: 80,
     height: 80,
     backgroundColor: '#000000',
-    borderRadius: 12,
+    borderRadius: 999,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,

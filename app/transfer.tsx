@@ -17,6 +17,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import * as LocalAuthentication from 'expo-local-authentication';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function TransferScreen() {
   const colorScheme = useColorScheme();
@@ -24,14 +26,31 @@ export default function TransferScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   
+  // Account data
+  const accounts = [
+    { id: '1', number: '*6034', balance: 75399.72, name: 'Konto osobiste', type: 'Konto ROR' },
+    { id: '2', number: '*7812', balance: 15280.50, name: 'Konto oszczędnościowe', type: 'Lokata' },
+    { id: '3', number: '*9456', balance: 8500.00, name: 'Konto firmowe', type: 'Konto biznesowe' },
+    { id: '4', number: '*2234', balance: 2450.25, name: 'Konto młodzieżowe', type: 'Konto Student' },
+    { id: '5', number: '*8891', balance: 45678.90, name: 'Konto premium', type: 'Konto Premium' },
+    { id: '6', number: '*1122', balance: 567.33, name: 'Konto dodatkowe', type: 'Konto pomocnicze' },
+    { id: '7', number: '*5577', balance: 12345.67, name: 'Konto inwestycyjne', type: 'Maklerskie' },
+  ];
+
   // Form state
+  const [selectedAccount, setSelectedAccount] = useState(accounts[0]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [recipientName, setRecipientName] = useState<string>('');
   const [recipientAddress, setRecipientAddress] = useState<string>('');
   const [accountNumber, setAccountNumber] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [title, setTitle] = useState<string>('');
-  const [transferDate, setTransferDate] = useState<string>('');
+  const [transferDate, setTransferDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showThankYou, setShowThankYou] = useState<boolean>(false);
+  const [pin, setPin] = useState<string>('');
+  const [showPinInput, setShowPinInput] = useState<boolean>(false);
   
   // Animation values - jednolita animacja wysuwania z dołu (100% wysokości ekranu)
   const screenHeight = Dimensions.get('window').height;
@@ -45,11 +64,6 @@ export default function TransferScreen() {
       duration: 300,
       useNativeDriver: true,
     }).start();
-    
-    // Initialize transfer date to today
-    const today = new Date();
-    const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
-    setTransferDate(formattedDate);
   }, []);
 
   // Auto-fill form from URL parameters
@@ -150,7 +164,7 @@ export default function TransferScreen() {
       return false;
     }
     
-    if (!transferDate.trim()) {
+    if (!transferDate) {
       Alert.alert('Błąd', 'Podaj datę przelewu');
       return false;
     }
@@ -158,30 +172,70 @@ export default function TransferScreen() {
     return true;
   };
 
-  const handleTransfer = async () => {
-    if (!validateForm()) return;
-    
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setTransferDate(selectedDate);
+    }
+  };
+
+  const handleBiometricAuth = async () => {
+    try {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      
+      if (!hasHardware || !isEnrolled) {
+        // Fallback to PIN
+        setShowPinInput(true);
+        return;
+      }
+
+      const authResult = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Autoryzuj przelew',
+        fallbackLabel: 'Użyj PIN',
+        cancelLabel: 'Anuluj',
+      });
+
+      if (authResult.success) {
+        await executeTransfer();
+      } else {
+        if (authResult.error === 'user_fallback') {
+          setShowPinInput(true);
+        }
+      }
+    } catch (error) {
+      setShowPinInput(true);
+    }
+  };
+
+  const handlePinSubmit = () => {
+    if (pin === '1234') { // Simplified PIN validation
+      setShowPinInput(false);
+      setPin('');
+      executeTransfer();
+    } else {
+      Alert.alert('Błąd', 'Nieprawidłowy PIN');
+      setPin('');
+    }
+  };
+
+  const executeTransfer = async () => {
     setIsLoading(true);
     
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      Alert.alert(
-        'Przelew wysłany',
-        `Przelew na kwotę ${amount} PLN dla ${recipientName} zaplanowany na ${transferDate} został wysłany pomyślnie.`,
-        [
-          {
-            text: 'OK',
-            onPress: handleClose
-          }
-        ]
-      );
+      setShowThankYou(true);
     } catch (error) {
       Alert.alert('Błąd', 'Nie udało się wysłać przelewu. Spróbuj ponownie.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleTransfer = async () => {
+    if (!validateForm()) return;
+    await handleBiometricAuth();
   };
 
   const isDark = colorScheme === 'dark';
@@ -224,26 +278,46 @@ export default function TransferScreen() {
           <View style={styles.placeholder} />
         </View>
 
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.scrollView} 
+          showsVerticalScrollIndicator={false}
+          onTouchStart={() => setIsDropdownOpen(false)}
+        >
           <View style={styles.content}>
             {/* Form */}
             <ThemedView style={styles.formSection}>
-              {/* From Account */}
+              {/* From Account Dropdown */}
               <View style={styles.inputGroup}>
                 <ThemedText style={styles.label}>Z rachunku</ThemedText>
-                <TouchableOpacity style={[
-                  styles.input,
-                  styles.dropdownButton,
-                  { 
-                    backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-                    borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
-                  }
-                ]}>
+                <TouchableOpacity 
+                  style={[
+                    styles.dropdownButton,
+                    { 
+                      borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+                    }
+                  ]}
+                  onPress={() => setIsDropdownOpen(!isDropdownOpen)}
+                >
                   <View style={styles.dropdownContent}>
-                    <ThemedText style={styles.dropdownText}>*6034</ThemedText>
-                    <ThemedText style={styles.dropdownSubtext}>75 399,72 PLN</ThemedText>
+                    <View style={styles.accountInfo}>
+                      <ThemedText style={styles.accountNumber}>{selectedAccount.number}</ThemedText>
+                      <ThemedText style={styles.accountName}>{selectedAccount.name}</ThemedText>
+                    </View>
+                    <View style={styles.accountBalance}>
+                      <ThemedText style={styles.balanceAmount}>
+                        {new Intl.NumberFormat('pl-PL', { 
+                          style: 'currency', 
+                          currency: 'PLN' 
+                        }).format(selectedAccount.balance)}
+                      </ThemedText>
+                      <ThemedText style={styles.accountType}>{selectedAccount.type}</ThemedText>
+                    </View>
                   </View>
-                  <Ionicons name="chevron-down" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
+                  <Ionicons 
+                    name={isDropdownOpen ? "chevron-up" : "chevron-down"} 
+                    size={20} 
+                    color={isDark ? '#8E8E93' : '#8E8E93'} 
+                  />
                 </TouchableOpacity>
               </View>
 
@@ -254,19 +328,15 @@ export default function TransferScreen() {
                   style={[
                     styles.input,
                     { 
-                      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
                       color: isDark ? '#FFFFFF' : '#000000',
                       borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
                     }
                   ]}
                   value={recipientName}
                   onChangeText={setRecipientName}
-                  placeholder="Wpisz nazwę odbiorcy"
+                  placeholder="Jan Kowalski"
                   placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
                 />
-                <TouchableOpacity style={styles.contactButton}>
-                  <Ionicons name="person-add" size={20} color="#4A3A7A" />
-                </TouchableOpacity>
               </View>
 
               {/* Recipient Address */}
@@ -275,15 +345,14 @@ export default function TransferScreen() {
                 <TextInput
                   style={[
                     styles.input,
-                    { 
-                      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+                    {
                       color: isDark ? '#FFFFFF' : '#000000',
                       borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
                     }
                   ]}
                   value={recipientAddress}
                   onChangeText={setRecipientAddress}
-                  placeholder="Wpisz adres odbiorcy"
+                  placeholder="ul. Przykładowa 1, 00-001 Warszawa"
                   placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
                 />
               </View>
@@ -294,15 +363,14 @@ export default function TransferScreen() {
                 <TextInput
                   style={[
                     styles.input,
-                    { 
-                      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+                    {
                       color: isDark ? '#FFFFFF' : '#000000',
                       borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
                     }
                   ]}
                   value={accountNumber}
                   onChangeText={handleAccountNumberChange}
-                  placeholder="Wpisz numer rachunku odbiorcy"
+                  placeholder="PL 1234 5678 9012 3456 7890 1234"
                   placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
                   keyboardType="numeric"
                   maxLength={32} // 26 digits + 6 spaces
@@ -316,8 +384,7 @@ export default function TransferScreen() {
                   style={[
                     styles.input,
                     styles.amountInput,
-                    { 
-                      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+                    {
                       color: isDark ? '#FFFFFF' : '#000000',
                       borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
                     }
@@ -336,66 +403,212 @@ export default function TransferScreen() {
                 <TextInput
                   style={[
                     styles.input,
-                    { 
-                      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+                    {
                       color: isDark ? '#FFFFFF' : '#000000',
                       borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
                     }
                   ]}
                   value={title}
                   onChangeText={setTitle}
-                  placeholder="Przelew środków"
+                  placeholder="Zwrot za zakupy, opłata za mieszkanie..."
                   placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
                 />
-                <TouchableOpacity style={styles.closeButton}>
-                  <Ionicons name="close" size={16} color="#8E8E93" />
-                </TouchableOpacity>
               </View>
 
               {/* Transfer Date */}
               <View style={styles.inputGroup}>
                 <ThemedText style={styles.label}>Data przelewu</ThemedText>
-                <TextInput
+                <TouchableOpacity
                   style={[
                     styles.input,
+                    styles.dateButton,
                     { 
-                      backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-                      color: isDark ? '#FFFFFF' : '#000000',
                       borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
                     }
                   ]}
-                  value={transferDate}
-                  onChangeText={setTransferDate}
-                  placeholder="11-11-2025"
-                  placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
-                />
-                <TouchableOpacity style={styles.calendarButton}>
-                  <Ionicons name="calendar" size={20} color="#8E8E93" />
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <ThemedText style={[
+                    styles.dateText,
+                    { color: isDark ? '#FFFFFF' : '#000000' }
+                  ]}>
+                    {transferDate.toLocaleDateString('pl-PL')}
+                  </ThemedText>
+                  <Ionicons name="calendar" size={20} color={isDark ? '#8E8E93' : '#8E8E93'} />
                 </TouchableOpacity>
               </View>
             </ThemedView>
 
-            {/* Transfer Button */}
-            <TouchableOpacity 
-              style={[
-                styles.transferButton,
-                isLoading && styles.transferButtonDisabled
-              ]}
-              onPress={handleTransfer}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ThemedText style={styles.transferButtonText}>Wysyłanie...</ThemedText>
-              ) : (
-                <>
-                  <Ionicons name="send" size={20} color="#FFFFFF" />
-                  <ThemedText style={styles.transferButtonText}>Wyślij przelew</ThemedText>
-                </>
-              )}
-            </TouchableOpacity>
+            {/* Spacer for sticky button */}
+            <View style={{ height: 100 }} />
           </View>
         </ScrollView>
+
+        {/* Sticky Transfer Button */}
+        <View style={[
+          styles.stickyButtonContainer,
+          { 
+            backgroundColor: isDark ? '#000000' : '#F5F5F5',
+            paddingBottom: insets.bottom + 16
+          }
+        ]}>
+          <TouchableOpacity 
+            style={[
+              styles.transferButton,
+              isLoading && styles.transferButtonDisabled
+            ]}
+            onPress={handleTransfer}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ThemedText style={styles.transferButtonText}>Wysyłanie...</ThemedText>
+            ) : (
+              <>
+                <ThemedText style={styles.transferButtonText}>Wyślij</ThemedText>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+
       </KeyboardAvoidingView>
+      
+      {/* Dropdown List - Positioned absolutely over everything */}
+      {isDropdownOpen && (
+        <View style={[
+          styles.dropdownOverlay,
+          { 
+            backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+            borderColor: isDark ? '#3A3A3C' : '#E5E5E7'
+          }
+        ]}>
+          <ScrollView 
+            style={styles.dropdownScroll}
+            showsVerticalScrollIndicator={Platform.OS === 'web'}
+            nestedScrollEnabled={true}
+          >
+            {accounts.map((account) => (
+              <TouchableOpacity
+                key={account.id}
+                style={[
+                  styles.dropdownItem,
+                  selectedAccount.id === account.id && styles.selectedItem
+                ]}
+                onPress={() => {
+                  setSelectedAccount(account);
+                  setIsDropdownOpen(false);
+                }}
+              >
+                <View style={styles.dropdownContent}>
+                  <View style={styles.accountInfo}>
+                    <ThemedText style={styles.accountNumber}>{account.number}</ThemedText>
+                    <ThemedText style={styles.accountName}>{account.name}</ThemedText>
+                  </View>
+                  <View style={styles.accountBalance}>
+                    <ThemedText style={styles.balanceAmount}>
+                      {new Intl.NumberFormat('pl-PL', { 
+                        style: 'currency', 
+                        currency: 'PLN' 
+                      }).format(account.balance)}
+                    </ThemedText>
+                    <ThemedText style={styles.accountType}>{account.type}</ThemedText>
+                  </View>
+                </View>
+                {selectedAccount.id === account.id && (
+                  <Ionicons name="checkmark" size={20} color="#007AFF" />
+                )}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Date Picker */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={transferDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handleDateChange}
+          minimumDate={new Date()}
+        />
+      )}
+
+      {/* PIN Input Modal */}
+      {showPinInput && (
+        <View style={styles.modalOverlay}>
+          <View style={[
+            styles.pinModal,
+            { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' }
+          ]}>
+            <ThemedText style={styles.pinTitle}>Wprowadź PIN</ThemedText>
+            <TextInput
+              style={[
+                styles.pinInput,
+                { 
+                  backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7',
+                  color: isDark ? '#FFFFFF' : '#000000'
+                }
+              ]}
+              value={pin}
+              onChangeText={setPin}
+              placeholder="••••"
+              placeholderTextColor={isDark ? '#8E8E93' : '#8E8E93'}
+              secureTextEntry
+              keyboardType="number-pad"
+              maxLength={4}
+              autoFocus
+            />
+            <View style={styles.pinButtons}>
+              <TouchableOpacity
+                style={[styles.pinButton, styles.pinButtonCancel]}
+                onPress={() => {
+                  setShowPinInput(false);
+                  setPin('');
+                }}
+              >
+                <ThemedText style={styles.pinButtonTextCancel}>Anuluj</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.pinButton, styles.pinButtonConfirm]}
+                onPress={handlePinSubmit}
+              >
+                <ThemedText style={styles.pinButtonText}>Potwierdź</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Thank You Screen */}
+      {showThankYou && (
+        <View style={styles.modalOverlay}>
+          <View style={[
+            styles.thankYouModal,
+            { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' }
+          ]}>
+            <View style={styles.thankYouIcon}>
+              <Ionicons name="checkmark-circle" size={80} color="#34C759" />
+            </View>
+            <ThemedText style={styles.thankYouTitle}>Przelew wysłany!</ThemedText>
+            <ThemedText style={styles.thankYouMessage}>
+              Przelew na kwotę {amount} PLN dla {recipientName} został pomyślnie wysłany.
+            </ThemedText>
+            <ThemedText style={styles.thankYouDate}>
+              Data realizacji: {transferDate.toLocaleDateString('pl-PL')}
+            </ThemedText>
+            <TouchableOpacity
+              style={styles.thankYouButton}
+              onPress={() => {
+                setShowThankYou(false);
+                handleClose();
+              }}
+            >
+              <ThemedText style={styles.thankYouButtonText}>Zakończ</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+      
       </View>
     </ContainerComponent>
   );
@@ -431,7 +644,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   backButton: {
     padding: 10,
@@ -455,6 +667,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    overflow: 'visible',
   },
   title: {
     fontSize: 24,
@@ -468,34 +681,36 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   formSection: {
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
+    marginBottom: 16,
+    overflow: 'visible',
+    backgroundColor: 'transparent',
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 16,
+    backgroundColor: 'transparent',
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 6,
+    opacity: 0.8,
   },
   input: {
-    height: 50,
+    height: 52,
     borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
+    fontWeight: '500',
   },
   amountInput: {
-    textAlign: 'right',
     fontWeight: '600',
     fontSize: 18,
   },
   transferButton: {
     backgroundColor: '#4A3A7A',
     borderRadius: 16,
-    padding: 18,
+    padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -549,15 +764,95 @@ const styles = StyleSheet.create({
     marginTop: -10,
     padding: 10,
   },
+  dropdownContainer: {
+    position: 'relative',
+    zIndex: 9999,
+  },
   dropdownButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    borderWidth: 1,
+    borderRadius: 12,
+    height: 60,
   },
   dropdownContent: {
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  accountInfo: {
+    flex: 1,
+  },
+  accountNumber: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  accountName: {
+    fontSize: 13,
+    opacity: 0.7,
+  },
+  accountBalance: {
+    alignItems: 'flex-end',
+  },
+  balanceAmount: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  accountType: {
+    fontSize: 13,
+    opacity: 0.7,
+  },
+  dropdownList: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    borderWidth: 1,
+    borderRadius: 12,
+    marginTop: 4,
+    maxHeight: 200,
+    zIndex: 10000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 16,
+  },
+  dropdownOverlay: {
+    position: 'absolute',
+    top: 140, // Adjust based on header height + first input position
+    left: 20,
+    right: 20,
+    borderWidth: 1,
+    borderRadius: 12,
+    maxHeight: 200,
+    zIndex: 10000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 16,
+  },
+  dropdownScroll: {
+    maxHeight: 200,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(142, 142, 147, 0.12)',
+  },
+  selectedItem: {
+    backgroundColor: 'rgba(0, 122, 255, 0.1)',
   },
   dropdownText: {
     fontSize: 16,
@@ -567,5 +862,128 @@ const styles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.7,
     marginTop: 2,
+  },
+  // Sticky button styles
+  stickyButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(142, 142, 147, 0.12)',
+  },
+  // Date button styles
+  dateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  // Modal overlay
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 20000,
+  },
+  // PIN Modal styles
+  pinModal: {
+    margin: 20,
+    padding: 24,
+    borderRadius: 16,
+    alignItems: 'center',
+    minWidth: 280,
+  },
+  pinTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 20,
+  },
+  pinInput: {
+    width: 120,
+    height: 50,
+    borderRadius: 12,
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '600',
+    marginBottom: 24,
+  },
+  pinButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  pinButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  pinButtonCancel: {
+    backgroundColor: 'rgba(142, 142, 147, 0.12)',
+  },
+  pinButtonConfirm: {
+    backgroundColor: '#4A3A7A',
+  },
+  pinButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  pinButtonTextCancel: {
+    color: '#8E8E93',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  // Thank You Modal styles
+  thankYouModal: {
+    margin: 20,
+    padding: 32,
+    borderRadius: 20,
+    alignItems: 'center',
+    maxWidth: 320,
+  },
+  thankYouIcon: {
+    marginBottom: 20,
+  },
+  thankYouTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  thankYouMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    opacity: 0.8,
+    marginBottom: 16,
+    lineHeight: 22,
+  },
+  thankYouDate: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.6,
+    marginBottom: 32,
+  },
+  thankYouButton: {
+    backgroundColor: '#4A3A7A',
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    borderRadius: 16,
+  },
+  thankYouButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
