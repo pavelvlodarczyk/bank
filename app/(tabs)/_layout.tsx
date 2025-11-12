@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
+import { BlurView } from 'expo-blur';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,8 +13,12 @@ export default function TabLayout() {
   const getTabColors = (colorScheme: 'light' | 'dark' | null | undefined) => ({
     activeTintColor: '#7B61FF', // Firmowy fiolet pozostaje ten sam
     inactiveTintColor: colorScheme === 'dark' ? '#888888' : '#687076',
-    backgroundColor: colorScheme === 'dark' ? '#1E1E1E' : '#FFFFFF',
-    borderTopColor: colorScheme === 'dark' ? '#333333' : '#E2E4E8',
+    backgroundColor: Platform.OS === 'ios' || Platform.OS === 'web' 
+      ? 'transparent' 
+      : colorScheme === 'dark' ? '#1E1E1E' : '#FFFFFF',
+    borderTopColor: Platform.OS === 'ios' || Platform.OS === 'web'
+      ? 'rgba(226, 228, 232, 0.2)' // Delikatna, przezroczysta ramka
+      : colorScheme === 'dark' ? '#333333' : '#E2E4E8',
   });
 
   const tabColors = getTabColors(colorScheme);
@@ -27,7 +32,20 @@ export default function TabLayout() {
           borderTopColor: tabColors.borderTopColor,
           borderTopWidth: 1,
           backgroundColor: tabColors.backgroundColor,
+          ...(Platform.OS === 'web' && {
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+          }),
         },
+        tabBarBackground: Platform.OS === 'ios' 
+          ? () => (
+              <BlurView 
+                intensity={80} 
+                tint={colorScheme === 'dark' ? 'dark' : 'light'} 
+                style={{ flex: 1 }} 
+              />
+            )
+          : undefined,
         headerShown: false,
         tabBarButton: HapticTab,
       }}>

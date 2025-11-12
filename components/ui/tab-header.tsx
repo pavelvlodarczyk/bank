@@ -1,9 +1,10 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity, Image as RNImage } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Image as RNImage, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemedText } from '@/components/themed-text';
+import { BlurView } from 'expo-blur';
 
 const profileAvatar = require('@/assets/images/avatars/profile.jpg');
 
@@ -18,9 +19,9 @@ interface TabHeaderProps {
 }
 
 const getColors = (colorScheme: 'light' | 'dark' | null | undefined) => ({
-  background: colorScheme === 'dark' ? '#121212' : '#F8F8F8',
+  background: 'transparent', // Przezroczyste tło dla efektu blur
   text: colorScheme === 'dark' ? '#FFFFFF' : '#222222',
-  iconBackground: colorScheme === 'dark' ? '#2A2A2A' : '#F2F2F2',
+  iconBackground: colorScheme === 'dark' ? 'rgba(42, 42, 42, 0.8)' : 'rgba(242, 242, 242, 0.8)',
 });
 
 export function TabHeader({ 
@@ -35,11 +36,18 @@ export function TabHeader({
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const colors = getColors(colorScheme);
-  
 
+  const HeaderWrapper = Platform.OS === 'ios' ? BlurView : View;
+  const blurProps = Platform.OS === 'ios' 
+    ? { 
+        intensity: 80, 
+        tint: (colorScheme === 'dark' ? 'dark' : 'light') as 'light' | 'dark',
+        style: [styles.header, styles.blurHeader, { paddingTop: insets.top + 16 }]
+      } 
+    : { style: [styles.header, styles.blurHeader, { backgroundColor: 'transparent', paddingTop: insets.top + 16 }] };
 
   return (
-    <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+    <HeaderWrapper {...blurProps}>
       <View style={styles.headerLeft}>
         {showAvatar && (
           <TouchableOpacity onPress={onAvatarPress} style={styles.avatarContainer}>
@@ -71,7 +79,7 @@ export function TabHeader({
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </HeaderWrapper>
   );
 }
 
@@ -82,6 +90,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 18,
     paddingBottom: 16,
+  },
+  blurHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    backgroundColor: 'transparent',
+    ...(Platform.OS === 'web' && {
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+    }),
   },
   headerLeft: {
     flexDirection: 'row',

@@ -196,20 +196,12 @@ export default function LoansScreen() {
 
   return (
     <ThemedView style={loanStyles.container}>
-      <TabHeader
-        showContact={true}
-        showAvatar={true}
-        onAvatarPress={() => router.push('/profile')}
-        onContactPress={() => {
-          console.log('Calling bank...');
-          alert('Dzwoniemy do banku: +48 800 123 456');
-        }}
-        onNotificationPress={() => console.log('Notifications pressed')}
-      />
-      
       <ScrollView 
         style={loanStyles.scrollContainer}
-        contentContainerStyle={loanStyles.scrollContent}
+        contentContainerStyle={[
+          loanStyles.scrollContent,
+          { paddingTop: insets.top + 80 } // Space for header
+        ]}
         onScroll={handleMainScroll}
         scrollEventThrottle={16}
       >
@@ -269,6 +261,21 @@ export default function LoansScreen() {
     >
       <SearchWithAI />
     </Animated.View>
+
+    {/* Header (Absolute positioned with blur) */}
+    <View style={loanStyles.absoluteHeader}>
+      <TabHeader
+        showContact={true}
+        showAvatar={true}
+        onAvatarPress={() => router.push('/profile')}
+        onContactPress={() => {
+          console.log('Calling bank...');
+          alert('Dzwoniemy do banku: +48 800 123 456');
+        }}
+        onNotificationPress={() => console.log('Notifications pressed')}
+      />
+    </View>
+
     </ThemedView>
   );
 }
@@ -297,6 +304,7 @@ const loanStyles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  absoluteHeader: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1000 },
   scrollContainer: {
     flex: 1,
   },

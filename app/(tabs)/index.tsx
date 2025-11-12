@@ -252,26 +252,17 @@ export default function HomeScreen() {
         />
       )}
       
-      <ScrollView 
-        style={styles.scrollContainer} 
-        contentContainerStyle={styles.scrollContent}
+      {/* Main Content - ScrollView with padding for header */}
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={[
+          styles.scrollContent, 
+          { paddingTop: insets.top + 80 } // Space for header
+        ]}
         onScroll={handleMainScroll}
-        scrollEventThrottle={100}
+        scrollEventThrottle={32}
+        showsVerticalScrollIndicator={false}
       >
-      
-      {/* Header (Safe Area aware) */}
-      <TabHeader
-        title=""
-        showContact={true}
-        showAvatar={true}
-        onAvatarPress={() => router.push('/profile')}
-        onContactPress={() => {
-          console.log('Calling bank...');
-          // In real app this would open phone dialer
-          alert('Dzwoniemy do banku: +48 800 123 456');
-        }}
-        onNotificationPress={() => console.log('Notifications pressed')}
-      />
 
       {/* Total balance */}
       <View style={styles.gapHorizontal}>
@@ -538,6 +529,21 @@ export default function HomeScreen() {
         <SearchWithAI />
       </Animated.View>
 
+      {/* Header (Absolute positioned with blur) */}
+      <View style={styles.absoluteHeader}>
+        <TabHeader
+          title=""
+          showContact={true}
+          showAvatar={true}
+          onAvatarPress={() => router.push('/profile')}
+          onContactPress={() => {
+            console.log('Calling bank...');
+            // In real app this would open phone dialer
+            alert('Dzwonimy do banku: +48 800 123 456');
+          }}
+          onNotificationPress={() => console.log('Notifications pressed')}
+        />
+      </View>
 
     </View>
   );
@@ -546,6 +552,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   notchGradient: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 },
+  absoluteHeader: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1000 },
   scrollContainer: { flex: 1 },
   scrollContent: { paddingBottom: 32 },
   fixedSearchWrapper: { position: 'absolute', left: 0, right: 0, paddingHorizontal: 18, paddingTop: 8, paddingBottom: 4 },

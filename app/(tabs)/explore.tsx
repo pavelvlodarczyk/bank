@@ -4,6 +4,7 @@ import { Platform, StyleSheet, View, TouchableOpacity, ScrollView, Animated, Nat
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Collapsible } from '@/components/ui/collapsible';
 import { ExternalLink } from '@/components/external-link';
@@ -161,6 +162,7 @@ const marketplaceData: MarketplaceCategory[] = [
 export default function ExploreScreen() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   
   // Floating search button state
   const [isSearchButtonHidden, setIsSearchButtonHidden] = useState(false);
@@ -312,20 +314,12 @@ export default function ExploreScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <TabHeader
-        showContact={true}
-        showAvatar={true}
-        onAvatarPress={() => router.push('/profile')}
-        onContactPress={() => {
-          console.log('Calling bank...');
-          alert('Dzwonimy do banku: +48 800 123 456');
-        }}
-        onNotificationPress={() => console.log('Notifications pressed')}
-      />
-      
       <ScrollView 
         style={styles.scrollContainer}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 80 } // Space for header
+        ]}
         onScroll={handleMainScroll}
         scrollEventThrottle={16}
       >
@@ -369,6 +363,21 @@ export default function ExploreScreen() {
       >
         <SearchWithAI />
       </Animated.View>
+
+      {/* Header (Absolute positioned with blur) */}
+      <View style={styles.absoluteHeader}>
+        <TabHeader
+          showContact={true}
+          showAvatar={true}
+          onAvatarPress={() => router.push('/profile')}
+          onContactPress={() => {
+            console.log('Calling bank...');
+            alert('Dzwoniemy do banku: +48 800 123 456');
+          }}
+          onNotificationPress={() => console.log('Notifications pressed')}
+        />
+      </View>
+
     </ThemedView>
   );
 }
@@ -377,6 +386,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  absoluteHeader: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1000 },
   scrollContainer: {
     flex: 1,
   },
